@@ -7,4 +7,4 @@
 #$ -j y              # <- join output & error (best!)
 
 cd /fsx/paco/multiscale_epidemic
-python3 yt_searches.py -d ${SGE_TASK_ID} -m 'Feb'
+python3 subset_phila.py -d ${SGE_TASK_ID} -m 'Feb'
