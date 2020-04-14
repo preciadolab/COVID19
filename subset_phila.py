@@ -56,7 +56,7 @@ def main():
 
     s_time=time.time()
     for i, file_name in enumerate(file_list):
-        cmd='sudo aws s3 cp s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/' + file_name + ' ./ --profile safegraph'
+        cmd='aws s3 cp s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/' + file_name + ' ./ --profile safegraph'
         result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         result.check_returncode()
 
@@ -78,7 +78,7 @@ def main():
                     newfile.write(line)
                     j= j+1
         #Delete file
-        cmd='sudo rm '+file_name
+        cmd='rm '+file_name
 
         deleted = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         deleted.check_returncode()
