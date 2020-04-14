@@ -5,7 +5,6 @@ import numpy as np
 import numpy.random as npr
 import getopt, sys
 import os
-import pickle
 import pandas as pd
 import gzip as gz
 import subprocess
@@ -36,8 +35,9 @@ def main():
             #REJECT IF NOT IN STANDARD FORMAT Mmm
             month = 'Feb'
 
-    cmd='sudo aws s3 ls s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/ --profile safegraph'
+    cmd='aws s3 ls s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/ --profile safegraph'
     result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    result.check_returncode()
 
     file_list = [x.split(' ')[-1] for x in result.stdout.split('\n')]
     file_list = sorted([nam for nam in file_list if nam[:4] == 'part'])
