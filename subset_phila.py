@@ -55,6 +55,7 @@ def main():
     #Iterate through file_list
 
     s_time=time.time()
+    print("Starting subset on {} chunks".format(len(file_list)))
     for i, file_name in enumerate(file_list):
         cmd='aws s3 cp s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/' + file_name + ' ./ --profile safegraph'
         result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
