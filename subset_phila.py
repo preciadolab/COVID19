@@ -1,5 +1,5 @@
 """
-Set of functions to obtain descriptive statistics from Veraset dataset
+Function to subset the whole safegraph dataset to a list of geohashes of same length
 """
 import numpy as np
 import numpy.random as npr
@@ -11,8 +11,6 @@ import subprocess
 import time
 import io
 
-#Create destination folder for safegraph data (downloaded one at a time)
-#Obtain safegraph adress as a function of the index
 def main():
     argument_list = sys.argv[1:]
     short_options = "d:m:"
@@ -35,6 +33,8 @@ def main():
             #REJECT IF NOT IN STANDARD FORMAT Mmm
             month = 'Feb'
 
+    #Create destination folder for safegraph data (downloaded one at a time)
+    #Obtain safegraph adress as a function of the index
     cmd='aws s3 ls s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/ --profile safegraph'
     result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     result.check_returncode()
@@ -59,6 +59,7 @@ def main():
 
     s_time=time.time()
     print("Starting subset on {} chunks".format(len(file_list)))
+    j= 0
     for file_name in file_list:
         cmd='aws s3 cp s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/' + file_name + ' ./ --profile safegraph'
         result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
@@ -75,7 +76,6 @@ def main():
             header = p.stdout.readline()
             newfile.write(header)
             #counter for observations in hashlist
-            j= 0
             for line in p.stdout:
                 #parse geohash to num_digits
                 if line.decode().split(',')[-2][0:num_digits] in hashlist:
