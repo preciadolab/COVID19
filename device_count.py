@@ -74,7 +74,7 @@ def main():
             if  curr_user != ref_user:
                 user_id.append(curr_user) #add user to list
                 if j!= 0:
-                ref_user = curr_user
+                    ref_user = curr_user
             j = j+1
         #Add avg_times and num_obs for last user
         print('Finished parsing file: ' + file_name)
