@@ -53,7 +53,6 @@ def main():
     j=0 #observations
     ref_user = -1
     ref_time = -1
-    cum_time =  0
     #Loop through files and lines in them
     for file_name in file_list:
         #Copy file from amazon bucket
@@ -78,8 +77,6 @@ def main():
                     num_obs.append(i) #add number of obs for previous user
                 ref_user = curr_user
             j = j+1
-            cum_time = cum_time + (curr_time - ref_time)
-            ref_time = curr_time
         #Add avg_times and num_obs for last user
         print('Finished parsing file: ' + file_name)
 
