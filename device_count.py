@@ -52,6 +52,7 @@ def main():
     j=0 #observations
     ref_user = -1
     ref_time = -1
+    m=0
     #Loop through files and lines in them
     for file_name in file_list:
         #Copy file from amazon bucket
