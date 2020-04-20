@@ -55,29 +55,32 @@ def main():
     ref_time = -1
     #Loop through files and lines in them
     for file_name in file_list:
-        #Copy file from amazon bucket
-        cmd='aws s3 cp s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/' + file_name + ' ./ --profile safegraph'
-        result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-        result.check_returncode()
+        # #Copy file from amazon bucket
+        # cmd='aws s3 cp s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/' + file_name + ' ./ --profile safegraph'
+        # result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        # result.check_returncode()
 
-        p = subprocess.Popen(
-            ["zcat", file_name],
-            stdout=subprocess.PIPE
-        )
-        #get rid of header line
-        header = p.stdout.readline()
-        for line in p.stdout:
-            #parse user to 
-            curr_user = line.decode().split(',')[0]
-            curr_country = line.decode().split(',')[7]
-            #Obtain user and compare to previous user
-            if  curr_user != ref_user:
-                user_id.append(curr_user) #add user to list
-                if j!= 0:
-                    ref_user = curr_user
-            j = j+1
-        #Add avg_times and num_obs for last user
+        # p = subprocess.Popen(
+        #     ["zcat", file_name],
+        #     stdout=subprocess.PIPE
+        # )
+        # #get rid of header line
+        # header = p.stdout.readline()
+        # for line in p.stdout:
+        #     #parse user to 
+        #     curr_user = line.decode().split(',')[0]
+        #     curr_country = line.decode().split(',')[7]
+        #     #Obtain user and compare to previous user
+        #     if  curr_user != ref_user:
+        #         user_id.append(curr_user) #add user to list
+        #         if j!= 0:
+        #             ref_user = curr_user
+        #     j = j+1
+        # #Add avg_times and num_obs for last user
         print('Finished parsing file: ' + file_name)
+        cmd='rm '+file_name
+        deleted = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        deleted.check_returncode()        
 
     with open('summary', 'w+') as resultfile:
         resultfile.write('Number of users: '+ str(len(user_id))+'\n')
