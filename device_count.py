@@ -46,7 +46,6 @@ def main():
     country_code = 'US'
 
     #Keep track of observations, add new users to list, list times for given user, fill list of avg_times
-    user_id = []
     num_obs = []
 
     #Initialize auxiliary variables
@@ -72,20 +71,19 @@ def main():
             curr_country = line.decode().split(',')[7]
             #Obtain user and compare to previous user
             if  curr_user != ref_user:
-                user_id.append(curr_user) #add user to list
+                m = m+1 #add user to list
                 if j!= 0:
                     ref_user = curr_user
             j = j+1
-        #Add avg_times and num_obs for last user
         print('Finished parsing file: ' + file_name)
         cmd='rm '+file_name
         deleted = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         deleted.check_returncode()        
 
     with open('summary', 'w+') as resultfile:
-        resultfile.write('Number of users: '+ str(len(user_id))+'\n')
+        resultfile.write('Number of users: '+ str(m)+'\n')
         resultfile.write('Total observations: '+str(j)+'\n')
-        resultfile.write('Avg. observations per user: '+ str(np.round(j/(len(user_id)),2))+'\n')
+        resultfile.write('Avg. observations per user: '+ str(np.round(j/(m),2))+'\n')
     return 0
 
 if __name__ == '__main__':
