@@ -72,16 +72,18 @@ def main():
             curr_country = line.decode().split(',')[7]
             #Obtain user and compare to previous user
             if  curr_user != ref_user:
-                m = m+1 #add user to list
+                if curr_country == 'US':
+                    m = m+1 #add user
                 if j!= 0:
                     ref_user = curr_user
-            j = j+1
+            if curr_country == 'US':
+                j = j+1 #only count observations that are in the US
         print('Finished parsing file: ' + file_name)
         cmd='rm '+file_name
         deleted = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         deleted.check_returncode()        
 
-    with open('summary', 'w+') as resultfile:
+    with open('summary_US', 'w+') as resultfile:
         resultfile.write('Number of users: '+ str(m)+'\n')
         resultfile.write('Total observations: '+str(j)+'\n')
         resultfile.write('Avg. observations per user: '+ str(np.round(j/(m),2))+'\n')
