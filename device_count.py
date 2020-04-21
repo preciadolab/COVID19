@@ -5,6 +5,7 @@ import numpy as np
 import numpy.random as npr
 import getopt, sys
 import os
+import pdb
 import pandas as pd
 import gzip as gz
 import subprocess
@@ -70,12 +71,12 @@ def main():
             #parse user to 
             curr_user = line.decode().split(',')[0]
             curr_country = line.decode().split(',')[7]
-
             #Obtain user and compare to previous user
             if  curr_user != ref_user:
                 print('new user from: ')
                 print(curr_country)
                 print(curr_country == 'US')
+                pdb.set_trace()
                 time.sleep(1)
                 if curr_country == 'US':
                     m = m+1 #add user
