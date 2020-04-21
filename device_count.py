@@ -75,6 +75,8 @@ def main():
             if  curr_user != ref_user:
                 print('new user from: ')
                 print(curr_country)
+                print(curr_country == 'US')
+                time.sleep(1)
                 if curr_country == 'US':
                     m = m+1 #add user
                 if j!= 0:
