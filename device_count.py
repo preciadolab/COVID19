@@ -73,9 +73,9 @@ def main():
 
             #Obtain user and compare to previous user
             if  curr_user != ref_user:
+                print('new user from: ')
+                print(curr_country)
                 if curr_country == 'US':
-                    print('new user from: ')
-                    print(curr_country)
                     m = m+1 #add user
                 if j!= 0:
                     ref_user = curr_user
