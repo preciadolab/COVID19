@@ -44,7 +44,7 @@ def main():
     file_list = sorted([nam for nam in file_list if nam[:4] == 'part'])
 
     #Define country codes to analyze
-    country_code = 'US'
+    country_code = 'US' + '\n'
 
     #Keep track of observations, add new users to list, list times for given user, fill list of avg_times
     num_obs = []
@@ -73,16 +73,11 @@ def main():
             curr_country = line.decode().split(',')[7]
             #Obtain user and compare to previous user
             if  curr_user != ref_user:
-                print('new user from: ')
-                print(curr_country)
-                print(curr_country == 'US')
-                pdb.set_trace()
-                time.sleep(1)
-                if curr_country == 'US':
+                if curr_country == country_code:
                     m = m+1 #add user
                 if j!= 0:
                     ref_user = curr_user
-            if curr_country == 'US':
+            if curr_country == country_code:
                 j = j+1 #only count observations that are in the US
         print('Finished parsing file: ' + file_name)
         cmd='rm '+file_name
