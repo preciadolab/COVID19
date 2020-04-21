@@ -70,6 +70,7 @@ def main():
             #parse user to 
             curr_user = line.decode().split(',')[0]
             curr_country = line.decode().split(',')[7]
+            print(curr_country)
             #Obtain user and compare to previous user
             if  curr_user != ref_user:
                 if curr_country == 'US':
