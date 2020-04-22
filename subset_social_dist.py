@@ -15,7 +15,7 @@ import io
 def main():
       
     #List files in folder corresponding to month
-    months_path = '../SocialDistancingMetrics/'
+    months_path = '../safegraph_social_dist_data/'
     month_list = sorted(os.listdir(months_path))
 
     #Loop through every month
@@ -29,8 +29,9 @@ def main():
             data = data.loc[indexes]
             data.reset_index()
             #Create column for census tract and column for census block
-            census_tract = [number[5:11] for number in data['origin_census_block_group']]
+            census_tract = [number[:-1] for number in data['origin_census_block_group']]
             data['census_tract'] = census_tract
+            data['pct_at_home'] = data['completely_home_device_count']/data['device_count']
             #overwrite file 
             print('Overwriting file {}'.format(file_name))
             data.to_csv(path_or_buf= months_path+ '/' + month+'/'+day+'/'+file_name, compression='gzip', index=False)
