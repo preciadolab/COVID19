@@ -32,17 +32,13 @@ def parse_bucketed_distance_json(x):
     else:
         return(0)
 
-def parse_devices_day_json(x):
-    if not isinstance(x, str):
-        return(0)
-    y = json.loads(x)
-    return(np.median(y[7:20]))
-
-def parse_devices_night_json(x):
-    if not isinstance(x, str):
-        return(0)
-    y = json.loads(x)
-    return(np.median(y[:7]+y[20:]))
+def parse_within_cbg(x, own_cbg):
+	if not isinstance(x, str):
+		return(0)
+	y = json.loads(x)
+	if own_cbg in y.keys():
+		return(int(y[own_cbg]))
+	return(0)
 
 def ratio_fun(series1, series2):
     series2 = series2 + 0.001
@@ -63,22 +59,10 @@ def main():
             indexes = [i for i, number in enumerate(data['origin_census_block_group']) if number[:5] == '42101']
             data = data.loc[indexes]
             data.reset_index()
-            #Create column for census tract and column for census block
-            census_tract = [number[:-1] for number in data['origin_census_block_group']]
-            data['census_tract'] = census_tract
-            
-            data['permanently_away_device_count'] = [parse_time_away_json(x) for x in data['bucketed_home_dwell_time']]
-            
-            data['pct_at_home'] = np.round(data['completely_home_device_count']/(data['device_count']-data['permanently_away_device_count']), 2)
-            
-            data['pct_within_neighborhood'] = np.round(([parse_bucketed_distance_json(x) for x in data['bucketed_distance_traveled']] +
-                                                 data['completely_home_device_count'])/(data['device_count']-data['permanently_away_device_count']),2)
+			#Define new variables (only those that need to parse a JSON)            
+            data['within_cbg_count'] = [parse_within_cbg(x, cbg) for (cbg, x) in zip(data['origin_census_block_group'], data['destination_cbgs'])]            
+            data['within_neighborhood'] = [parse_bucketed_distance_json(x) for x in data['bucketed_distance_traveled']]
 
-            #day defined as 7 am to 8 pm
-            data['median_devices_home_day'] = [parse_devices_day_json(x) for x in data['at_home_by_each_hour']]
-            data['median_devices_home_night'] = [parse_devices_night_json(x) for x in data['at_home_by_each_hour']]
-
-            data['ratio_day_night_device_count'] = ratio_fun(data['median_devices_home_day'], data['median_devices_home_night'])
             #overwrite file 
             print('Overwriting file {}'.format(file_name))
             data.to_csv(path_or_buf= months_path+ '/' + month+'/'+day+'/'+file_name, compression='gzip', index=False)
