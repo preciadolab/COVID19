@@ -24,6 +24,8 @@ import re
 import geohash as gh
 import pandas as pd
 from datetime import datetime
+from dateutil import tz
+import glob
 
 #with gzip.open("part-00000-tid-3624586920856034780-8555a0db-de4b-4ebb-a116-5f1270b9b3f4-216277-c000 (1).csv.gz", 'rb') as f:
 #    file_content = f.read()
@@ -31,22 +33,41 @@ from datetime import datetime
 """
 Read in the csv files and stores the geohash and time of the visit
 """
-df = pd.read_csv ("part-00000-tid-3624586920856034780-8555a0db-de4b-4ebb-a116-5f1270b9b3f4-216277-c000 (1).csv.gz")
+li = []
+#for day in range(14,29):
+day = 24
+path = r'C:\Users\abhin\Documents\Research\Covid-19-Research\COVID19_Free_Meal_Sites_PUBLICVIEW-shp\multiscale_epidemic-master\data\Veraset\Feb{}'.format(day)
+all_files = glob.glob(path+"/*.csv.gz")
+for filename in all_files:
+    df = pd.read_csv (filename,index_col = None, header = 0)
+    li.append(df)
+
+li = pd.concat(li,axis =0, ignore_index = True)
 # print(df.iloc[0])
 # print(df.iloc[:,[5,6]])
 
 """
 This part takes in the latitude and longitude and finds the geohashes.
 """
-loc_time = df.iloc[:,[0,5,6]];
+loc_time = li.iloc[:,[0,5,6]];
 loc_time_list = loc_time.values.tolist()
+
+def convertTime(userList):
+    # find timezone codes
+    from_zone = tz.gettz('UTC')
+    to_zone = tz.gettz('America/New_York')
+    timeList = []
+    for i in range(len(userList)):
+        utc = datetime.fromtimestamp(userList[i][1])
+        utc = utc.replace(tzinfo=from_zone)
+        eastern = utc.astimezone(to_zone)
+        timeList.append(eastern)
+    return timeList
 
 """
 This part takes in the time from 1970 and converts it to a day-time object.
 """
-day_time = []
-for i in range(len(loc_time_list)):
-    day_time.append(datetime.fromtimestamp(loc_time_list[i][1]))
+day_time = convertTime(loc_time_list)
 
 """
 This part reads in the shape files with the individual food distribution sites, and converts
@@ -92,7 +113,7 @@ to the geohash of the site that the user visited. The algorithm in short is as f
     6: Once that was done, we checked if the value of time (eg. 10.25) was between the opening and closing times of the given site.
 This function returns a boolean with True (visit occurred) or False (if visit didn't occur).
 """
-def checkSiteVisit(day_time,times):
+def checkSiteVisit(day_time,times,i,j):
     #print(loc_time_list[i][2],ghdist[j])
     """
     This block takes in inputs and decomposes them into time in the format
@@ -107,8 +128,8 @@ def checkSiteVisit(day_time,times):
     temp = re.findall(r'\d+', Time_Site)
     timesiteNum = list(map(int, temp))
     if len(timesiteNum) == 0:
-        print("No opening hours")
-        return False
+        #print("No opening hours")
+        return True
     elif len(timesiteNum) == 2:
         timesiteNum.insert(1,0)
         timesiteNum.insert(3,0)
@@ -125,7 +146,7 @@ def checkSiteVisit(day_time,times):
     This section checks if a visit indeed occurred during the day/time of the ping.
     """
     if Hour > 17 or Hour < 7:
-        print('Hour {} is during off hours'.format(Hour))
+        #print('Hour {} is during off hours'.format(Hour))
         return False
     elif Hour > 12:
         Hour_12 = Hour - 12
@@ -145,16 +166,21 @@ digits match:
 Creates a visitsList with the user, time, and day of visit.
 Creates a histogram with the number of visits by site.
 """
+totalVisits = 0
 visitsList = []
 numberOfVisits = []
 for i in range(len(ghdist)):
     numberOfVisits.append([ghdist[i],0])
 for i in range(len(loc_time_list)):
     for j in range(len(ghdist)):
-        ghEqual = checkGeoHash(loc_time_list[i][2],ghdist[j],6)
+        ghEqual = checkGeoHash(loc_time_list[i][2],ghdist[j],7)
         if ghEqual == True:
-            visitOccured = checkSiteVisit(day_time,times)
+            visitOccured = checkSiteVisit(day_time,times,i,j)
             if visitOccured == True:
                visitsList.append([loc_time_list])
                numberOfVisits[j][1] = numberOfVisits[j][1] + 1
-               
+               totalVisits = totalVisits + 1
+
+propOfVisits = []
+for i in range(len(numberOfVisits)):
+    propOfVisits.append([numberOfVisits[i][0],100*numberOfVisits[i][1]/totalVisits])
