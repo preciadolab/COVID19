@@ -22,6 +22,7 @@ import pandas as pd
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
+import pdb
 
 """
 Useful Functions for Script:
@@ -151,7 +152,7 @@ def readInKey(filename):
 Read in the csv files and stores the geohash and time of the visit, sequentially
 """
 day = 24
-path = r'multiscale_epidemic-master\data\Veraset\Feb{}'.format(day)
+path = '..\..\multiscale_epidemic\data\Veraset\Feb{}'.format(day)
 all_files = glob.glob(path+"/*.csv.gz")
 
 '''
