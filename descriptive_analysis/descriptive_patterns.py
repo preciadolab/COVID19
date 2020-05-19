@@ -13,51 +13,13 @@ import time
 import io
 import pdb
 from textwrap import wrap
+
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 import matplotlib
 matplotlib.use('Agg')
-def make_boxplot(pd_series, title, file_name = 'box.png'):
-    width = 0.6
-    x = np.arange(len(pd_series))
-    plt.bar(x, pd_series, width)
-    plt.title(title)
-    #Make sure xticks are readable and fall inside
-    plt.xticks(rotation=0, wrap=True, fontsize = 'small')
-    plt.tick_params(axis= 'x', pad=0)
-    plt.subplots_adjust(left=0.07, right=0.95, bottom=0.15)
-    labels = ['\n'.join(wrap(l,14)) for l in pd_series.index]
-    plt.xticks(x, labels)
-    plt.ylabel('Frequency')
-
-    fig = plt.gcf()
-    fig.set_size_inches(12, 5)
-    fig.savefig(file_name, dpi=150)
-    fig.clf()
-
-def make_histograms(pd_series, title, labels, file_name):
-    bins = 100
-
-    plt.hist(pd_series[0], bins, alpha=0.5, label=labels[0], range=(30, 750))
-    plt.hist(pd_series[1], bins, alpha=0.5, label=labels[1], range=(30, 750))
-    plt.legend(loc='upper right')
-
-    plt.title(title)
-    plt.xlim(30, 750)
 
 
-    fig = plt.gcf()
-    fig.set_size_inches(10, 5)
-    fig.savefig(file_name, dpi=150)
-    fig.clf()
-
-def make_histogram(pd_series, title, file_name, range = None):
-    plt.hist(pd_series, bins = 50, range = range)
-    plt.title(title)
-    fig = plt.gcf()
-    fig.set_size_inches(10, 5)
-    fig.savefig(file_name, dpi=300)
-    fig.clf()
 
 def avg_top_10(json_int):
     x = json_int.replace('[','')
