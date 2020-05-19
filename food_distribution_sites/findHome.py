@@ -45,7 +45,11 @@ def readInVisitorLists(t1,t2,month,day):
 
 readInVisitorLists(20,6,2,25)
 
-exit
+# open json file
+with open('{}_visitorDict.json'.format(day), 'w') as json_file:
+    visitorDict = json.load(json_file)
+print(visitorDict)
+
 
 
 #    with open(siteVisitorsFile, newline='') as csvfile:
