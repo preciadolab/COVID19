@@ -23,6 +23,7 @@ import glob
 import matplotlib.pyplot as plt
 import numpy as np
 import pdb
+import os
 
 """
 Useful Functions for Script:
@@ -148,38 +149,29 @@ def readInKey(filename):
     siteLocationTimes['times'] = times
     return siteLocationTimes
 
-"""
-Read in the csv files and stores the geohash and time of the visit, sequentially
-"""
-day = 24
-path = '..\..\multiscale_epidemic\data\Veraset\Feb{}'.format(day)
-all_files = glob.glob(path+"/*.csv.gz")
-
-'''
-Initialization Block
-'''
-siteLocationTimes = readInKey('COVID19_FreeMealSites')
-visitorDict = { geohash:{'name':name,'visits':0,'visitors':[]} for name, geohash in zip(siteLocationTimes.index.tolist(),siteLocationTimes.geo_hash.tolist())} 
-print(len(visitorDict))
-totalVisits = 0 # initialize total number of visits per day.
-
-for filename in all_files: # reads in each file and finds visitors and site visits
-    userLocationTimes = pd.read_csv(filename,index_col = None, header = 0)
-    userLocationTimes['converted_times'] = convertToEasternTime(userLocationTimes)  # This part takes in the time from 1970 and converts it to a day-time object.
-    visitorDict , totalVisits = checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,7)
-
-with open('{}_visitorDict.json'.format(day), 'w') as fp:
-    json.dump(visitorDict, fp)
+def findVisits(day , month, path):
+    """
+    Read in the csv files and stores the geohash and time of the visit, sequentially
+    """
+    all_files = os.listdir(path+month+'\\'+day+'\\')
+    all_files = [name for name in all_files if re.search(r'part', name) is not None]
     
-subset = []
-geo = []
-for item in siteLocationTimes.geo_hash.tolist():
-    if visitorDict[item]['visits'] != 0:
-        subset.append(visitorDict[item]['visits'])
-        geo.append(item)
-plt.figure(figsize=(15,10))
-p1 = plt.bar(geo, subset, 0.5)
-plt.ylabel('Number of Visits')
-plt.xlabel('Food Distribution Sites')
-plt.title('Visits to food distribution site by day')
-plt.xticks(np.arange(len(geo)), (geo), fontsize=14)
+    '''
+    Initialization Block
+    '''
+    siteLocationTimes = readInKey('COVID19_FreeMealSites')
+    visitorDict = { geohash:{'name':name,'visits':0,'visitors':[]} for name, geohash in zip(siteLocationTimes.index.tolist(),siteLocationTimes.geo_hash.tolist())} 
+    print(len(visitorDict))
+    totalVisits = 0 # initialize total number of visits per day.
+    
+    for filename in all_files: # reads in each file and finds visitors and site visits
+        userLocationTimes = pd.read_csv(path+month+'\\'+day+'\\'+filename,index_col = None, header = 0)
+        userLocationTimes['converted_times'] = convertToEasternTime(userLocationTimes)  # This part takes in the time from 1970 and converts it to a day-time object.
+        visitorDict , totalVisits = checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,7)
+    
+    with open('..\\stats\\findVisitsResults\\food_visits_{}-{}.json'.format(month,day), 'w') as fp:
+        json.dump(visitorDict, fp)
+    print('Finished finding visits for {}-{}'.format(month, day))
+
+if __name__ == '__main__':
+    findVisits(day = '24', month = '02', path = '..\data\Veraset\\') 

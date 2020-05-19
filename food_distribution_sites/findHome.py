@@ -18,7 +18,7 @@ Functions for program
 '''
 
 '''
-Reads in times in EST, converts them to 1970 timestamp
+Reads in night time limits (e.g. 8 pm - 8 am) in EST, converts them to 1970 timestamp for particular day
 '''
 
 def nightTimeStamp(t1,t2,month,day):
@@ -35,22 +35,29 @@ def nightTimeStamp(t1,t2,month,day):
     
     return [begin_timestamp,end_timestamp]
 
+#Read ALL food_visits files (one by one) and obtain a long list of unique visitors
+
 def readInVisitorLists(t1,t2,month,day):
     begin_timestamp, end_timestamp = nightTimeStamp(t1,t2,month,day)
-    siteVisitorsFile = '{}_visitorList.csv'.format(day)
-    veraSetFileDir = r'C:\Users\abhin\Documents\Research\Covid-19-Research\COVID19_Free_Meal_Sites_PUBLICVIEW-shp\multiscale_epidemic-master\data\Veraset\Feb{}'.format(day)
+    siteVisitorsFile = '\\food_visits_{}-{}.json'.format(month,day)
+    veraSetFileDir = '..\..\multiscale_epidemic\data\Veraset\Feb{}'.format(day)
     siteVisitors = pd.read_csv(siteVisitorsFile,index_col = None, header = 0)
     print(siteVisitors)
-    return
+    return 
 
-readInVisitorLists(20,6,2,25)
+def findHome():
+    readInVisitorLists(20,6,2,25)
+    
+    # open json file
+    with open('{}_visitorDict.json'.format(day), 'w') as json_file:
+        visitorDict = json.load(json_file)
+    print(visitorDict)
 
-# open json file
-with open('{}_visitorDict.json'.format(day), 'w') as json_file:
-    visitorDict = json.load(json_file)
-print(visitorDict)
+#Dictionary geohash7:duration (filter out locations with very little time) 
 
 
+if __name__ == '__main__':
+    findHome() 
 
 #    with open(siteVisitorsFile, newline='') as csvfile:
 #        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
