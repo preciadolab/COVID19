@@ -42,16 +42,13 @@ def readInVisitorLists(t1,t2,month,day):
     siteVisitorsFile = '\\food_visits_{}-{}.json'.format(month,day)
     veraSetFileDir = '..\..\multiscale_epidemic\data\Veraset\Feb{}'.format(day)
     siteVisitors = pd.read_csv(siteVisitorsFile,index_col = None, header = 0)
-    print(siteVisitors)
     return 
 
-def findHome():
-    readInVisitorLists(20,6,2,25)
-    
-    # open json file
-    with open('{}_visitorDict.json'.format(day), 'w') as json_file:
-        visitorDict = json.load(json_file)
-    print(visitorDict)
+#def findHome(): - make this into a function later to be taken in by __main__
+
+# open json file
+with open('..\\stats\\findVisitsResults\\food_visits_{}-{}.json'.format(month,day), 'w') as json_file:
+    visitorDict = json.load(json_file)
 
 #Dictionary geohash7:duration (filter out locations with very little time) 
 
