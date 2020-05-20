@@ -80,7 +80,7 @@ def main():
         print(subset_social_dist(soc_dist_path = '../social_distancing/',
                                  patterns_path = '../weekly_patterns/',
                                  county = county,
-                                 backfill = True))
+                                 backfill = False))
 
         #complete time series for county
         compliance_time_series(county = county,
