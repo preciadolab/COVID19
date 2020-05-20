@@ -12,7 +12,7 @@ import time
 import io
 import pdb
 import pyarrow.parquet as pq
-
+import re
 
 def main():
     argument_list = sys.argv[1:]
