@@ -89,7 +89,7 @@ def main():
                                backfill = True)
 
     print("Synching time series to bucket")
-    cmd='aws s3 sync ./stats/time_series/ s3://edu-upenn-wattslab-covid'
+    cmd='aws s3 sync ../stats/time_series/ s3://edu-upenn-wattslab-covid'
     result = subprocess.run(cmd, shell=True, universal_newlines=True)
     result.check_returncode()   
     print('-- Finished synching time series to bucket')

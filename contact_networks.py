@@ -107,7 +107,7 @@ def contact_networks(county, core_path, patterns_path):
         place_cbgs = place_cbg_contacts_table(county_patterns, norm_factor, prior_dict)
         place_cbgs = place_cbgs.loc[place_cbgs['expected_contacts']>0]
 
-        place_cbgs[['origin_census_block_group', 'estimated_visits', 'expected_contacts']].to_csv('stats/networks/bipartite_network_{}.csv'.format(patterns_date),
+        place_cbgs[['origin_census_block_group', 'estimated_visits', 'expected_contacts']].to_csv('../stats/networks/bipartite_network_{}.csv'.format(patterns_date),
                             index = True)
         #Now we construct non-bipartite network for the same week.
         #For each place we construct an edge list, then we aggregate with a double key
@@ -117,7 +117,7 @@ def contact_networks(county, core_path, patterns_path):
         large_df = pd.concat(temp_df, ignore_index=True)
         print('Finished merging lists of edges')
         contact_net = large_df.groupby(['origin_cbg','destination_cbg']).sum()
-        contact_net.to_csv('stats/networks/contact_network_{}.csv'.format(patterns_date), index=True)
+        contact_net.to_csv('../stats/networks/contact_network_{}.csv'.format(patterns_date), index=True)
         print('Finished exporting networks')
 
 if __name__ == '__main__':

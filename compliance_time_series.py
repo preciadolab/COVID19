@@ -86,13 +86,13 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False):
     #List files for social distancing metrics in that county
     months_path = '../social_distancing/social_dist_'+ county +'/'
     month_list = sorted(os.listdir(months_path))
-    os.makedirs( 'stats/time_series/', exist_ok = True)
+    os.makedirs( '../stats/time_series/', exist_ok = True)
     #metrics dictionary to be filled looping through every day
-    if not os.path.isfile('stats/time_series/metrics_{}.json'.format(county)) or backfill:
+    if not os.path.isfile('../stats/time_series/metrics_{}.json'.format(county)) or backfill:
         metrics = {}
         existing_dates = []
     else:
-        with open('stats/time_series/metrics_{}.json'.format(county)) as fp:
+        with open('../stats/time_series/metrics_{}.json'.format(county)) as fp:
             metrics = json.load(fp)
     #obtain the dates we already processed
         existing_dates = [date for date in 
@@ -141,7 +141,7 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False):
 
     if changed:
         collapse_low_device(metrics)
-        with open('stats/time_series/metrics_{}.json'.format(county), 'w+') as fp:
+        with open('../stats/time_series/metrics_{}.json'.format(county), 'w+') as fp:
             json.dump(metrics, fp)
     return(0)
 
