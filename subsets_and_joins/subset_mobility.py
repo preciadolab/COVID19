@@ -24,6 +24,8 @@ def main():
         print (str(err))
         sys.exit(2)
 
+    day = '01' #default values
+    month = '05' #default values
     for current_argument, current_value in arguments:
         if current_argument in ("-d", "--day"):
             print ("Subsetting for day: " + current_value)
@@ -32,7 +34,7 @@ def main():
             print ("Subsetting for month: " + current_value)
             month = current_value
 
-    cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' #safegraph profile?
+    cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/ --profile veraset'
     pdb.set_trace()
     result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     result.check_returncode()
@@ -59,7 +61,7 @@ def main():
     j= 0
     pdb.set_trace()
     for file_name in file_list:
-        cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' + file_name + ' ./ ' #+ '--profile safegraph'
+        cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' + file_name + ' ./ --profile veraset' 
         result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         result.check_returncode()
 
