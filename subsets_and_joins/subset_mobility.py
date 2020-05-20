@@ -10,6 +10,7 @@ import gzip as gz
 import subprocess
 import time
 import io
+import pdb
 
 def main():
     argument_list = sys.argv[1:]
@@ -26,24 +27,21 @@ def main():
     for current_argument, current_value in arguments:
         if current_argument in ("-d", "--day"):
             print ("Subsetting for day: " + current_value)
-            k= int(current_value)
-            k = str('%02d' % k)
+            day= current_value
         elif current_argument in ("-m", "--month"):
             print ("Subsetting for month: " + current_value)
-            #REJECT IF NOT IN STANDARD FORMAT Mmm
-            month = 'Feb'
+            month = current_value
 
-    #Create destination folder for safegraph data (downloaded one at a time)
-    #Obtain safegraph adress as a function of the index
-    cmd='aws s3 ls s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/ --profile safegraph'
+    cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' #safegraph profile?
+    pdb.set_trace()
     result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     result.check_returncode()
 
     file_list = [x.split(' ')[-1] for x in result.stdout.split('\n')]
     file_list = sorted([nam for nam in file_list if nam[:4] == 'part'])
 
-    #Create local folder corresponding to day
-    newfile_path = '../Phl_Data/'+ month +'/'+ month + k +'/'
+    #Create local folder to output filtered data
+    newfile_path = '../veraset-42101/'+ month +'/'+ day +'/'
     os.makedirs(newfile_path, exist_ok=True)
 
     #Verify that list of hashes is of the same length
@@ -56,16 +54,16 @@ def main():
     num_digits = len(list(hashlist)[0])
 
     #Iterate through file_list
-
     s_time=time.time()
     print("Starting subset on {} chunks".format(len(file_list)))
     j= 0
+    pdb.set_trace()
     for file_name in file_list:
-        cmd='aws s3 cp s3://safegraph-outgoing/movement-sample-global/feb2020/2020/02/'+ k +'/' + file_name + ' ./ --profile safegraph'
+        cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' + file_name + ' ./ ' #+ '--profile safegraph'
         result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         result.check_returncode()
 
-        newfile_name= file_name #remove the gzip extension
+        newfile_name= file_name #remove the gzip extension?
         #open pipe to read gz file, currently in working directory
         p = subprocess.Popen(
             ["zcat", file_name],
