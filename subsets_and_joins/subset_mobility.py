@@ -69,12 +69,12 @@ def main():
 
         newfile_name= re.sub(r'.snappy.parquet', '.csv', file_name) #remove the gzip extension?
 
-		df = pq.read_table(file_name).to_pandas()
-		df['subsetter'] = [s[:num_digits] for s in df['geo_hash']]
+        df = pq.read_table(file_name).to_pandas()
+        df['subsetter'] = [s[:num_digits] for s in df['geo_hash']]
 
-		df.set_index('subsetter', drop = False)
-		pdb.set_trace()
-		df.loc[hashlist]
+        df.set_index('subsetter', drop = False)
+        pdb.set_trace()
+        df.loc[hashlist]
 
         #subset to hashlist
         with gz.open(newfile_path + newfile_name, 'wb+') as newfile:
