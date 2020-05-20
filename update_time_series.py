@@ -22,6 +22,7 @@ from subset_core_places import subset_core_places
 from subset_patterns import subset_patterns
 from subset_social_dist import subset_social_dist
 from compliance_time_series import *
+from sync_caseloads import sync_caseloads
 
 def main():
     #Sync weekly_patterns files from Safegraph
@@ -87,6 +88,8 @@ def main():
                                core_path = '../core_places/',
                                patterns_path = '../weekly_patterns/',
                                backfill = True)
+
+        print(sync_caseloads(county = county))
 
     print("Synching time series to bucket")
     cmd='aws s3 sync ../stats/time_series/ s3://edu-upenn-wattslab-covid'

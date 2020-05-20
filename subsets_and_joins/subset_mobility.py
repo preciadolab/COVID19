@@ -11,6 +11,8 @@ import subprocess
 import time
 import io
 import pdb
+import pyarrow.parquet as pq
+
 
 def main():
     argument_list = sys.argv[1:]
@@ -24,7 +26,7 @@ def main():
         print (str(err))
         sys.exit(2)
 
-    day = '01' #default values
+    day = '10' #default values
     month = '05' #default values
     for current_argument, current_value in arguments:
         if current_argument in ("-d", "--day"):
@@ -35,7 +37,7 @@ def main():
             month = current_value
 
     cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/ --profile veraset'
-    pdb.set_trace()
+
     result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     result.check_returncode()
 
@@ -59,18 +61,22 @@ def main():
     s_time=time.time()
     print("Starting subset on {} chunks".format(len(file_list)))
     j= 0
-    pdb.set_trace()
+
     for file_name in file_list:
         cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' + file_name + ' ./ --profile veraset' 
         result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         result.check_returncode()
 
-        newfile_name= file_name #remove the gzip extension?
-        #open pipe to read gz file, currently in working directory
-        p = subprocess.Popen(
-            ["zcat", file_name],
-            stdout=subprocess.PIPE
-        )
+        newfile_name= re.sub(r'.snappy.parquet', '.csv', file_name) #remove the gzip extension?
+
+		df = pq.read_table(file_name).to_pandas()
+		df['subsetter'] = [s[:num_digits] for s in df['geo_hash']]
+
+		df.set_index('subsetter', drop = False)
+		pdb.set_trace()
+		df.loc[hashlist]
+
+        #subset to hashlist
         with gz.open(newfile_path + newfile_name, 'wb+') as newfile:
             #read header write header
             header = p.stdout.readline()
