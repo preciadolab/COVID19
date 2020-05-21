@@ -91,7 +91,9 @@ def main():
         df.reset_index(inplace=True)
         df.set_index('subsetter', drop = True, inplace = True)
         hashlist_local = df.index.unique()
-        df_list = [df.loc[[hash_]] for hash_ in hashlist if hash_ in hashlist_local]
+        hashlist_local = [hash_ for hash_ in hashlist if hash_ in hashlist_local]
+        df_list = [df.loc[[hash_]] for hash_ in hashlist_local]
+        pdb.set_trace()
         
         df = pd.concat(df_list, ignore_index = True)
         df.set_index('index', drop = True, inplace=True)
@@ -99,7 +101,7 @@ def main():
         #subset to hashlist
         if np.sum([not isinstance(x,str) for x in df.geo_hash]) >0:
             sys.exit('--Error: {} contains non-strings in the geohash field'.format(newfile_name))
-            
+
         df.to_csv(newfile_path + newfile_name, index = False)
         #Delete file
         cmd='rm '+file_name
