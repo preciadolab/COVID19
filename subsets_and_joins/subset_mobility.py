@@ -92,7 +92,7 @@ def main():
         df.set_index('subsetter', drop = True, inplace = True)
         hashlist_local = df.index.unique()
         hashlist_local = [hash_ for hash_ in hashlist if hash_ in hashlist_local]
-        df.loc[hashlist_local]
+        df = df.loc[hashlist_local]
         df.set_index('index', drop = True, inplace=True)
         pdb.set_trace()
         
