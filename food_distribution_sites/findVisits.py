@@ -178,6 +178,8 @@ def findVisits(day, month, path_veraset, path_output, k = None):
     for filename in all_files: # reads in each file and finds visitors and site visits
         userLocationTimes = pd.read_csv(path_veraset+month+'/'+day+'/'+filename , index_col = None)
         userLocationTimes['converted_times'] = convertToEasternTime(userLocationTimes)  # This part takes in the time from 1970 and converts it to a day-time object.
+        if np.sum([not isinstance(x,str) for x in userLocationTimes.geo_hash]) >0:
+            pdb.set_trace()        
         visitorDict , totalVisits = checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,7)
 
     os.makedirs(path_output, exist_ok=True)
