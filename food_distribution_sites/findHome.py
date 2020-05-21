@@ -68,10 +68,12 @@ def geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin
     #prune visits of less than a minute
     if visitor in visitorDict.keys():
         visitorDict[visitor] = { k:v for k, v in visitorDict[visitor].items() if v > 1}
+        if len(visitorDict[visitor]) == 0:
+            visitorDict.pop(visitor, None)
     return visitorDict
 
 
-def findHome(month,day,path_veraset,path_json, path_output, precision = 7, t1 = 20, t2 = 5, k = None):
+def findHome(month,day,path_veraset,path_json, path_output, precision = 7, t1 = 20, t2 = 5):
     unique_visitors = readInSiteVisitLists(path_json)
     begin_timestamp, end_timestamp = nightTimeStamp(t1,t2,month,day)    
     visitorDict = {}
@@ -97,11 +99,44 @@ def findHome(month,day,path_veraset,path_json, path_output, precision = 7, t1 = 
     print('--Finished finding home frequencies for {}-{}'.format(month, day))
     pdb.set_trace()
     return visitorDict
-    
-if __name__ == '__main__':
-    findHome(month = '05',
-             day = '07',
+
+def main():
+    argument_list = sys.argv[1:]
+    short_options = "d:m:k:"
+    long_options = ["day", "month", "index"]
+
+    try:
+        arguments, values = getopt.getopt(argument_list, short_options, long_options)
+    except getopt.error as err:
+        # Output error, and return with an error code
+        print (str(err))
+        sys.exit(2)
+
+    day = '10' #default values
+    month = '05' #default values
+    k = None
+    for current_argument, current_value in arguments:
+        if current_argument in ("-d", "--day"):
+            print ("Subsetting for day: " + current_value)
+            day= current_value
+        elif current_argument in ("-m", "--month"):
+            print ("Subsetting for month: " + current_value)
+            month = current_value
+        elif current_argument in ("-k", "--index"):
+            #find k-th day since April 1 
+            if int(current_value) in list(range(1,31)):
+                month = '04'
+                day = str(int(current_value)).zfill(2)
+            elif int(current_value) in list(range(31,62)):
+                month = '05'
+                day = str(int(current_value) - 30).zfill(2)
+            print("Subsetting for {}-{} (mm-dd)".format(month, day))
+
+    findHome(month = month,
+             day = day,
              path_veraset ='../../veraset-42101/',
              path_json ='../../stats/findVisitsResults/',
              path_output = '../../stats/findHomeResults/')
+
+if __name__ == '__main__':
         
