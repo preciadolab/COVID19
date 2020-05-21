@@ -177,11 +177,12 @@ def findVisits(day, month, path_veraset, path_output, k = None):
         userLocationTimes = pd.read_csv(path_veraset+month+'/'+day+'/'+filename , index_col = None)
         if np.sum([not isinstance(x,str) for x in userLocationTimes.geo_hash]) >0:
             sys.exit('--Error: {} contains non-strings in the geohash field'.format(filename))
+
         userLocationTimes['converted_times'] = convertToEasternTime(userLocationTimes)  # This part takes in the time from 1970 and converts it to a day-time object.        
         visitorDict , totalVisits = checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,7)
 
     os.makedirs(path_output, exist_ok=True)
-    with open(path_output + 'food_visits_{}-{}.json'.format(month,day), 'w') as fp:
+    with open(path_output + 'food_visits_{}-{}.json'.format(month,day), 'w+') as fp:
         json.dump(visitorDict, fp)
     print('--Finished finding visits for {}-{}, found {} visits'.format(month, day, totalVisits))
 

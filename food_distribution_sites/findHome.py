@@ -92,7 +92,7 @@ def findHome(month,day,path_veraset,path_json, path_output, precision = 7, t1 = 
         print("Finished scanning chunk: {}".format(filename))
 
     os.makedirs(path_output, exist_ok=True)
-    with open(path_output + 'home_freqs_{}-{}.json'.format(month,day), 'w') as fp:
+    with open(path_output + 'home_freqs_{}-{}.json'.format(month,day), 'w+') as fp:
         json.dump(visitorDict, fp)
     print('--Finished finding home frequencies for {}-{}'.format(month, day))
     pdb.set_trace()
@@ -103,5 +103,5 @@ if __name__ == '__main__':
              day = '07',
              path_veraset ='../../veraset-42101/',
              path_json ='../../stats/findVisitsResults/',
-             path_output = '../../stats/findHomeResults')
+             path_output = '../../stats/findHomeResults/')
         
