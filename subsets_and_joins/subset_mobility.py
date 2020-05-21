@@ -49,10 +49,10 @@ def main():
     os.makedirs(newfile_path, exist_ok=True)
 
     #Verify that list of hashes is of the same length
-    hashlist= set(['dr47p', 'dr47q', 'dr47r', 'dr47x', 'dr47z', 'd34e0', 'd34e1', 'd34e2', 'd34e3', 'd34e4',
+    hashlist= ['dr47p', 'dr47q', 'dr47r', 'dr47x', 'dr47z', 'd34e0', 'd34e1', 'd34e2', 'd34e3', 'd34e4',
                    'd34e5', 'd34e6', 'd34e7', 'd34e8', 'd34e9', 'd34eb', 'd34ec', 'd34ed', 'd34ee', 'd34ef',
                    'd34eg', 'd34es', 'd34es', 'd34et', 'd34eu', 'd34ev', 'd346z', 'd34db', 'd34dc', 'd34df',
-                   'd34s0', 'd34s5', 'd34sh', 'd34sj', 'd34sn', 'd34sk', 'd34sm'])
+                   'd34s0', 'd34s5', 'd34sh', 'd34sj', 'd34sn', 'd34sk', 'd34sm']
     if len(set([len(x) for x in hashlist])) != 1:
         sys.exit("NameError: Geohashes are of different length")
     num_digits = len(list(hashlist)[0])
@@ -71,8 +71,10 @@ def main():
 
         df = pq.read_table(file_name).to_pandas()
         df['subsetter'] = [s[:num_digits] for s in df['geo_hash']]
+        df_list = [df.loc[hash_] for hash_ in hashlist]
 
-        df.set_index('subsetter', drop = False)
+        df.reset_index()
+        df.set_index('subsetter', drop = True, inplace = True)
         pdb.set_trace()
         df.loc[hashlist]
 
