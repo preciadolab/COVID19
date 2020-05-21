@@ -81,7 +81,7 @@ def main():
         df.set_index('index', drop = True, inplace=True)
 
         #subset to hashlist
-        df.to_csv(newfile_path + newfile_name, 'wb+', index = False)
+        df.to_csv(newfile_path + newfile_name, index = False)
         #Delete file
         cmd='rm '+file_name
         deleted = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
