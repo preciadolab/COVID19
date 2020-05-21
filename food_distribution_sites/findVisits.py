@@ -17,7 +17,7 @@ and the time of the visit.
 import shapefile
 import json
 import re
-import geohash as gh
+import geohash as gh #which geohash?
 import pandas as pd
 import glob
 import matplotlib.pyplot as plt
@@ -115,8 +115,8 @@ def checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,prec
         t2 = siteLocationTimes[siteLocationTimes.geo_hash == firstLast.index.tolist()[0]].times[0][t1.dayofweek]
         visitOccured = checkVisitTimes(t1,t2)
         if visitOccured:
-            elapsedTime = (timeStamps.iloc[1] - timeStamps.iloc[0])/60
-            if elapsedTime > 0.5:
+            elapsedTime = timeStamps.iloc[1] - timeStamps.iloc[0] #seconds
+            if elapsedTime > 20:
                 visitorDict[firstLast.index.tolist()[0]]['visitors'].append(uniqueIDs[i])
                 visitorDict[firstLast.index.tolist()[0]]['visits']+=1
                 totalVisits+=1
@@ -159,13 +159,14 @@ def findVisits(day , month, path_veraset, path_output):
     '''
     siteLocationTimes = readInKey('COVID19_FreeMealSites')
     visitorDict = { geohash:{'name':name,'visits':0,'visitors':[]} for name, geohash in zip(siteLocationTimes.index.tolist(),siteLocationTimes.geo_hash.tolist())} 
-    print(len(visitorDict))
+    print('Finding visits for {} locations'.format(len(visitorDict)))
     totalVisits = 0 # initialize total number of visits per day.
     
     for filename in all_files: # reads in each file and finds visitors and site visits
         userLocationTimes = pd.read_csv(path_veraset+month+'/'+day+'/'+filename , index_col = None)
         userLocationTimes['converted_times'] = convertToEasternTime(userLocationTimes)  # This part takes in the time from 1970 and converts it to a day-time object.
         visitorDict , totalVisits = checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,7)
+        print(totalVisits)
     
     os.makedirs(path_output, exist_ok=True)
     with open(path_output + 'food_visits_{}-{}.json'.format(month,day), 'w') as fp:
