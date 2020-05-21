@@ -10,6 +10,7 @@ from dateutil import tz
 import pandas as pd
 import os
 import re
+import pdb
 
 '''
 Functions for program
@@ -68,7 +69,7 @@ def geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin
     return visitorDict
 
 
-def findHome(t1,t2,month,day,precision,path_to_veraset,path_to_json):
+def findHome(month,day,path_to_veraset,path_to_json, precision = 7, t1 = 20, t2 = 5, k = None):
     unique_visitors = readInSiteVisitLists(path_to_json)
     begin_timestamp, end_timestamp = nightTimeStamp(t1,t2,month,day-1)    
     visitorDict = {}
@@ -82,7 +83,7 @@ def findHome(t1,t2,month,day,precision,path_to_veraset,path_to_json):
         visitorsInFile = userLocationTimes.index.intersection(unique_visitors).unique()
         subsetOfFile = userLocationTimes.loc[userLocationTimes.index.intersection(unique_visitors).unique()]
         #MAKE SURE THE RESULTING FILE IS SORTED BY USER AND THEN BY TIME
-        #TRAVERSE ROW BY ROW and differenceDWELL EVENTS FROM COMMUTING
+        #TRAVERSE ROW BY ROW and difference DWELL EVENTS FROM COMMUTING
         for i in range(len(visitorsInFile)):
             visitor = visitorsInFile[i]
             entriesForVisitor = subsetOfFile.loc[visitor]
@@ -91,5 +92,5 @@ def findHome(t1,t2,month,day,precision,path_to_veraset,path_to_json):
         return visitorDict
     
 if __name__ == '__main__':
-    findHome(20,5,'02',24,7,'..\data\Veraset\\','..\stats\\findVisitsResults\\')
+    findHome(month = '02',day = 24,path_to_veraset ='../../veraset-42101/', path_to_json ='../../stats/findVisitsResults/')
         
