@@ -147,10 +147,21 @@ def readInKey(filename):
     siteLocationTimes['times'] = times
     return siteLocationTimes
 
-def findVisits(day , month, path_veraset, path_output):
+def findVisits(day, month, path_veraset, path_output, k = None):
     """
     Read in the csv files and stores the geohash and time of the visit, sequentially
     """
+    #Optional specification of month and day to use in parallel
+    if k is not None:
+        if k in list(range(1,31)):
+            month = '04'
+            day = str(k).zfill(2)
+        elif k in list(range(31,62)):
+            month = '05'
+            day = str(k - 30).zfill(2)
+    print("Finding visits for {}-{} (mm-dd)".format(day, month))
+    ############################################################
+
     all_files = os.listdir(path_veraset + month+'/'+day+'/')
     all_files = [name for name in all_files if re.search(r'part', name) is not None]
     
@@ -166,12 +177,16 @@ def findVisits(day , month, path_veraset, path_output):
         userLocationTimes = pd.read_csv(path_veraset+month+'/'+day+'/'+filename , index_col = None)
         userLocationTimes['converted_times'] = convertToEasternTime(userLocationTimes)  # This part takes in the time from 1970 and converts it to a day-time object.
         visitorDict , totalVisits = checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,7)
-        print(totalVisits)
-    
+
     os.makedirs(path_output, exist_ok=True)
     with open(path_output + 'food_visits_{}-{}.json'.format(month,day), 'w') as fp:
         json.dump(visitorDict, fp)
-    print('Finished finding visits for {}-{}'.format(month, day))
+    print('--Finished finding visits for {}-{}, found {} visits'.format(month, day, totalVisits))
 
 if __name__ == '__main__':
-    findVisits(day = '24', month = '04', path_veraset = '../../veraset-42101/', path_output = '../../stats/findVisitsResults/') 
+    for k in range(2,50):
+        findVisits(day = '02',
+                   month = '04',
+                   path_veraset = '../../veraset-42101/',
+                   path_output = '../../stats/findVisitsResults/',
+                   k = k) 
