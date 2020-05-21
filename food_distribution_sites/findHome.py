@@ -66,7 +66,8 @@ def geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin
                 else:
                     visitorDict[visitor][geohash] = visitorDict[visitor][geohash] + (entry2.utc_timestamp - entry1.utc_timestamp)/60 #minutes
     #prune visits of less than a minute
-    visitorDict[visitor] = { k:v for k, v in visitorDict[visitor].items() if v > 1}
+    if visitor in visitorDict.keys():
+        visitorDict[visitor] = { k:v for k, v in visitorDict[visitor].items() if v > 1}
     return visitorDict
 
 
