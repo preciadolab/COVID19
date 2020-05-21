@@ -95,6 +95,7 @@ def findHome(month,day,path_veraset,path_json, path_output, precision = 7, t1 = 
     with open(path_output + 'home_freqs_{}-{}.json'.format(month,day), 'w') as fp:
         json.dump(visitorDict, fp)
     print('--Finished finding home frequencies for {}-{}'.format(month, day))
+    pdb.set_trace()
     return visitorDict
     
 if __name__ == '__main__':
