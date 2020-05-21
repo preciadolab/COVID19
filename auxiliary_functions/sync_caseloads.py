@@ -6,6 +6,7 @@ import pandas as pd
 import io
 import requests
 import pdb
+import math
 
 def sync_caseloads(county):
     month_names = ['January', 'February', 'March', 'April',
@@ -15,6 +16,8 @@ def sync_caseloads(county):
     url = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv'
     s= requests.get(url).content 
     df = pd.read_csv(io.StringIO(s.decode('utf-8')), dtype = {'fips':str}, parse_dates = ['date'])
+    nyc_index = [x == 'New York City' for x in df['county']]
+    df.loc[nyc_index, 'fips'] = '36061'
 
     df.set_index('fips', drop = True, inplace = True)
     #subset to county

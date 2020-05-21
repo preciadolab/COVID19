@@ -16,8 +16,8 @@ import re
 
 def main():
     argument_list = sys.argv[1:]
-    short_options = "d:m:"
-    long_options = ["day", "month"]
+    short_options = "d:m:k:"
+    long_options = ["day", "month", "index"]
 
     try:
         arguments, values = getopt.getopt(argument_list, short_options, long_options)
@@ -35,8 +35,20 @@ def main():
         elif current_argument in ("-m", "--month"):
             print ("Subsetting for month: " + current_value)
             month = current_value
+        elif current_argument in ("-k", "--index"):
+            #find k-th day since April 1 
+            if int(k) in list(range(1,31)):
+                month = '04'
+                day = str(k).zfill(2)
+            elif int(k) in list(range(31,62)):
+                month = '05'
+                day = str(k-30).zfill(2)
+            print("Subsetting for {}-{} (mm-dd)".format(day, month))
 
-    cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/ --profile veraset'
+    if int(month) > 5 or (int(month) >= 5 and int(day) >= 4): 
+        cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/ --profile veraset'
+    else:
+        cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/backfill/2020/'+ month +'/'+day+'/ --profile veraset'
 
     result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     result.check_returncode()
@@ -63,7 +75,11 @@ def main():
     j= 0
 
     for file_name in file_list:
-        cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' + file_name + ' ./ --profile veraset' 
+        if int(month) > 5 or (int(month) >= 5 and int(day) >= 4): 
+            cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' + file_name + ' ./ --profile veraset' 
+        else:
+            cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/backfill/2020/'+ month +'/'+day+'/' + file_name + ' ./ --profile veraset' 
+
         result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         result.check_returncode()
 
