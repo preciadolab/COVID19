@@ -62,9 +62,11 @@ def geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin
                 if (visitor in visitorDict) == False:
                      visitorDict[visitor] = {}
                 if (geohash in visitorDict[visitor]) == False:
-                    visitorDict[visitor].update({geohash:(entry2.utc_timestamp - entry1.utc_timestamp)/60})
+                    visitorDict[visitor].update({geohash:(entry2.utc_timestamp - entry1.utc_timestamp)/60}) #minutes
                 else:
-                    visitorDict[visitor][geohash] = visitorDict[visitor][geohash] + (entry2.utc_timestamp - entry1.utc_timestamp)/60
+                    visitorDict[visitor][geohash] = visitorDict[visitor][geohash] + (entry2.utc_timestamp - entry1.utc_timestamp)/60 #minutes
+    #prune visits of less than a minute
+    visitorDict[visitor] = { k:v for k, v in visitorDict[visitor].items() if v > 1}
     return visitorDict
 
 
@@ -86,7 +88,7 @@ def findHome(month,day,path_to_veraset,path_to_json, precision = 7, t1 = 20, t2 
             entriesForVisitor = subsetOfFile.loc[[visitor]]
             visitorDict = geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,
                                                  precision,begin_timestamp,end_timestamp)
-
+        print("Finished scanning chunk: {}".format(filename))
     pdb.set_trace()
     return visitorDict
     
