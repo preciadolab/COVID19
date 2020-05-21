@@ -37,12 +37,12 @@ def main():
             month = current_value
         elif current_argument in ("-k", "--index"):
             #find k-th day since April 1 
-            if int(k) in list(range(1,31)):
+            if int(current_value) in list(range(1,31)):
                 month = '04'
-                day = str(k).zfill(2)
-            elif int(k) in list(range(31,62)):
+                day = str(current_value).zfill(2)
+            elif int(current_value) in list(range(31,62)):
                 month = '05'
-                day = str(k-30).zfill(2)
+                day = str(current_value - 30).zfill(2)
             print("Subsetting for {}-{} (mm-dd)".format(day, month))
 
     if int(month) > 5 or (int(month) >= 5 and int(day) >= 4): 
