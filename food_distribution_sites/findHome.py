@@ -23,8 +23,8 @@ Reads in night time limits (e.g. 8 pm - 8 am) in EST, converts them to 1970 time
 def nightTimeStamp(t1,t2,month,day):
     
     # datetime format of opening hours
-    begin = datetime.datetime(2020,int(month),day, t1)
-    end = datetime.datetime(2020,int(month),day+1, t2)
+    begin = datetime.datetime(2020,int(month),int(day)-1, t1)
+    end = datetime.datetime(2020,int(month),int(day), t2)
     
     # find timestamps of night limits on that day
     from_zone = tz.gettz('America/New_York')
@@ -32,7 +32,7 @@ def nightTimeStamp(t1,t2,month,day):
     begin_timestamp = begin.replace(tzinfo=from_zone).timestamp()
     end_timestamp = end.replace(tzinfo=from_zone).timestamp()
     
-    return [begin_timestamp,end_timestamp]
+    return [begin_timestamp, end_timestamp]
 
 '''
 Read ALL food_visits files (one by one) and obtain a long list of unique visitors
@@ -73,24 +73,26 @@ def findHome(month,day,path_to_veraset,path_to_json, precision = 7, t1 = 20, t2 
     unique_visitors = readInSiteVisitLists(path_to_json)
     begin_timestamp, end_timestamp = nightTimeStamp(t1,t2,month,day-1)    
     visitorDict = {}
-    all_files = os.listdir(path_to_veraset+month+'\\'+str(day)+'\\')
+    all_files = os.listdir(path_to_veraset+month+'/'+ day +'/')
     all_files = [name for name in all_files if re.search(r'part', name) is not None]
     
     for filename in all_files: # reads in each file and finds visitors and site visits
-        userLocationTimes = pd.read_csv(path_to_veraset+month+'\\'+str(day)+'\\'+filename,index_col = 'caid', header = 0)
-        #Traverse files row by row
-        #subset to users in visitors
+        userLocationTimes = pd.read_csv(path_to_veraset+month+'/'+ day +'/'+filename, index_col = 'caid')
+
         visitorsInFile = userLocationTimes.index.intersection(unique_visitors).unique()
         subsetOfFile = userLocationTimes.loc[userLocationTimes.index.intersection(unique_visitors).unique()]
-        #MAKE SURE THE RESULTING FILE IS SORTED BY USER AND THEN BY TIME
-        #TRAVERSE ROW BY ROW and difference DWELL EVENTS FROM COMMUTING
+
         for i in range(len(visitorsInFile)):
             visitor = visitorsInFile[i]
             entriesForVisitor = subsetOfFile.loc[visitor]
+            pdb.set_trace()
             if len(entriesForVisitor.geo_hash) != 9:
                 visitorDict = geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin_timestamp,end_timestamp)
         return visitorDict
     
 if __name__ == '__main__':
-    findHome(month = '02',day = 24,path_to_veraset ='../../veraset-42101/', path_to_json ='../../stats/findVisitsResults/')
+    findHome(month = '05',
+             day = '07',
+             path_to_veraset ='../../veraset-42101/',
+             path_to_json ='../../stats/findVisitsResults/')
         
