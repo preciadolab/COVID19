@@ -23,6 +23,7 @@ Reads in night time limits (e.g. 8 pm - 8 am) in EST, converts them to 1970 time
 def nightTimeStamp(t1,t2,month,day):
     
     # datetime format of opening hours
+    pdb.set_trace()
     begin = datetime.datetime(2020,int(month),int(day)-1, t1)
     end = datetime.datetime(2020,int(month),int(day), t2)
     
