@@ -71,10 +71,11 @@ def main():
 
         df = pq.read_table(file_name).to_pandas()
         df['subsetter'] = [s[:num_digits] for s in df['geo_hash']]
-        df_list = [df.loc[hash_] for hash_ in hashlist]
 
         df.reset_index()
         df.set_index('subsetter', drop = True, inplace = True)
+        df_list = [df.loc[hash_] for hash_ in hashlist]
+
         pdb.set_trace()
         df.loc[hashlist]
 
