@@ -87,7 +87,8 @@ Finds Geohash intersections between users and places. Sets geohash as index.
 
 def geohashIntersections(userLocationTimes,siteLocationTimes,prec):
     gh_places = pd.Index([x[:prec] for x in siteLocationTimes.geo_hash])
-    pdb.set_trace()
+    if np.sum([not isinstance(x,str) for x in userLocationTimes.geo_hash]) >0:
+        pdb.set_trace()
     gh_users = pd.Index([x[:prec] for x in userLocationTimes.geo_hash])
     userLocationTimes.geo_hash = gh_users
     siteLocationTimes.geo_hash = gh_places
