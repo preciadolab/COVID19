@@ -159,7 +159,7 @@ def findVisits(day, month, path_veraset, path_output, k = None):
         elif k in list(range(31,62)):
             month = '05'
             day = str(k - 30).zfill(2)
-    print("Finding visits for {}-{} (mm-dd)".format(day, month))
+    print("Finding visits for {}-{} (mm-dd)".format(month, day))
     ############################################################
 
     all_files = os.listdir(path_veraset + month+'/'+day+'/')
@@ -184,9 +184,9 @@ def findVisits(day, month, path_veraset, path_output, k = None):
     print('--Finished finding visits for {}-{}, found {} visits'.format(month, day, totalVisits))
 
 if __name__ == '__main__':
-    for k in range(2,50):
-        findVisits(day = '02',
-                   month = '04',
-                   path_veraset = '../../veraset-42101/',
-                   path_output = '../../stats/findVisitsResults/',
-                   k = k) 
+    #for k in range(2,50):
+    findVisits(day = '07',
+               month = '04',
+               path_veraset = '../../veraset-42101/',
+               path_output = '../../stats/findVisitsResults/',
+               k = None) 
