@@ -75,7 +75,7 @@ def findHome(month,day,path_veraset,path_json, path_output, precision = 7, t1 = 
     unique_visitors = readInSiteVisitLists(path_json)
     begin_timestamp, end_timestamp = nightTimeStamp(t1,t2,month,day)    
     visitorDict = {}
-    all_files = os.listdir(path_veraset+month+'/'+ day +'/')
+    all_files = sorted(os.listdir(path_veraset+month+'/'+ day +'/'))
     all_files = sorted([name for name in all_files if re.search(r'part', name) is not None])
     
     for filename in all_files: # reads in each file and finds visitors and site visits
