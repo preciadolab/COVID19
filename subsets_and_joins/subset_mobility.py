@@ -94,9 +94,6 @@ def main():
         hashlist_local = [hash_ for hash_ in hashlist if hash_ in hashlist_local]
         df = df.loc[hashlist_local]
         df.set_index('index', drop = True, inplace=True)
-        pdb.set_trace()
-        
-
 
         #subset to hashlist
         if np.sum([not isinstance(x,str) for x in df.geo_hash]) >0:
