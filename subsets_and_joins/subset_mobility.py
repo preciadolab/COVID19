@@ -43,7 +43,7 @@ def main():
             elif int(current_value) in list(range(31,62)):
                 month = '05'
                 day = str(int(current_value) - 30).zfill(2)
-            print("Subsetting for {}-{} (mm-dd)".format(day, month))
+            print("Subsetting for {}-{} (mm-dd)".format(month, day))
 
     if int(month) > 5 or (int(month) >= 5 and int(day) >= 4): 
         cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/ --profile veraset'
@@ -86,10 +86,6 @@ def main():
         newfile_name= re.sub(r'.snappy.parquet', '.csv', file_name) #remove the gzip extension?
 
         df = pq.read_table(file_name).to_pandas()
-        if np.sum([not isinstance(x,str) for x in df.geo_hash]) >0:
-            print(file_name)
-            pdb.set_trace()
-
         df['subsetter'] = [s[:num_digits] for s in df['geo_hash']]
 
         df.reset_index(inplace=True)
@@ -101,6 +97,9 @@ def main():
         df.set_index('index', drop = True, inplace=True)
 
         #subset to hashlist
+        if np.sum([not isinstance(x,str) for x in df.geo_hash]) >0:
+            print(file_name)
+            pdb.set_trace()
         df.to_csv(newfile_path + newfile_name, index = False)
         #Delete file
         cmd='rm '+file_name
