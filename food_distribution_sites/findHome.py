@@ -66,9 +66,9 @@ def geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin
                     visitorDict[visitor].update({geohash:(entry2.utc_timestamp - entry1.utc_timestamp)/60}) #minutes
                 else:
                     visitorDict[visitor][geohash] = visitorDict[visitor][geohash] + (entry2.utc_timestamp - entry1.utc_timestamp)/60 #minutes
-    #prune visits of less than a minute
+    #prune visits of less than half a minute
     if visitor in visitorDict.keys():
-        visitorDict[visitor] = { k:v for k, v in visitorDict[visitor].items() if v > 1}
+        visitorDict[visitor] = { k:v for k, v in visitorDict[visitor].items() if v > 0.5}
         if len(visitorDict[visitor]) == 0:
             visitorDict.pop(visitor, None)
     return visitorDict
@@ -98,7 +98,6 @@ def findHome(month,day,path_veraset,path_json, path_output, precision = 7, t1 = 
     with open(path_output + 'home_freqs_{}-{}.json'.format(month,day), 'w+') as fp:
         json.dump(visitorDict, fp)
     print('--Finished finding home frequencies for {}-{}'.format(month, day))
-    pdb.set_trace()
     return visitorDict
 
 def main():
