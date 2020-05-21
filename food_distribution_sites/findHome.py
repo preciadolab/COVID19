@@ -21,9 +21,7 @@ Reads in night time limits (e.g. 8 pm - 8 am) in EST, converts them to 1970 time
 '''
 
 def nightTimeStamp(t1,t2,month,day):
-    
     # datetime format of opening hours
-    pdb.set_trace()
     begin = datetime.datetime(2020,int(month),int(day)-1, t1)
     end = datetime.datetime(2020,int(month),int(day), t2)
     
@@ -72,7 +70,7 @@ def geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin
 
 def findHome(month,day,path_to_veraset,path_to_json, precision = 7, t1 = 20, t2 = 5, k = None):
     unique_visitors = readInSiteVisitLists(path_to_json)
-    begin_timestamp, end_timestamp = nightTimeStamp(t1,t2,month,day-1)    
+    begin_timestamp, end_timestamp = nightTimeStamp(t1,t2,month,day)    
     visitorDict = {}
     all_files = os.listdir(path_to_veraset+month+'/'+ day +'/')
     all_files = [name for name in all_files if re.search(r'part', name) is not None]
