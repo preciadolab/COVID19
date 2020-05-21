@@ -187,9 +187,9 @@ def findVisits(day, month, path_veraset, path_output, k = None):
     print('--Finished finding visits for {}-{}, found {} visits'.format(month, day, totalVisits))
 
 if __name__ == '__main__':
-    #for k in range(2,50):
+    for k in range(2,50):
     findVisits(day = '07',
                month = '04',
                path_veraset = '../../veraset-42101/',
                path_output = '../../stats/findVisitsResults/',
-               k = None) 
+               k = k) 
