@@ -42,7 +42,7 @@ def readInSiteVisitLists(path_to_json):
     all_files = os.listdir(path_to_json)
     unique_visitors = []
     for filename in all_files:
-        with open(filename) as fp:
+        with open(path_to_json + filename) as fp:
             visitorDict = json.load(fp)
         visitors = [x for y in [v['visitors'] for k,v in visitorDict.items()] for x in y]
         unique_visitors.append(list(set(visitors)))
