@@ -49,16 +49,6 @@ def get_metrics_dict(row, date, place_cbgs, county_places, type_ = 'cbg'):
                          }
                  }}
     return(attribute_dict)
-    
-def place_cbg_table(pd_patterns):
-    #vstack hstack of iterrows
-    arr_ = np.vstack([ddd.row_exploder(row) for i, row in pd_patterns.iterrows() if len(row['visitor_home_cbgs']) > 2])
-    #form into a dataframe and add double indexing
-    df = pd.DataFrame(arr_, columns=['safegraph_place_id', 'origin_census_block_group', 'visits'])
-    df = df.astype({'visits': 'int32'}, copy = False)
-    #set origin_census_block_group as index
-    df.set_index('origin_census_block_group', drop= True, inplace = True)
-    return(df)
 
 def collapse_low_device(metrics):
     for key, value in metrics.items():

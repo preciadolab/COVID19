@@ -72,35 +72,26 @@ def main():
         df = pq.read_table(file_name).to_pandas()
         df['subsetter'] = [s[:num_digits] for s in df['geo_hash']]
 
-        df.reset_index()
+        df.reset_index(inplace=True)
         df.set_index('subsetter', drop = True, inplace = True)
         hashlist_local = df.index.unique()
         df_list = [df.loc[hash_] for hash_ in hashlist if hash_ in hashlist_local]
-
-        pdb.set_trace()
-        df.loc[hashlist]
+        
+        pdb.set_trace()        
+        df = pd.concat(df_list, ignore_index = True)
+        df.sort_values(by = index, inplace=True)
+        df.set_index('index', drop = True, inplace=True)
 
         #subset to hashlist
-        with gz.open(newfile_path + newfile_name, 'wb+') as newfile:
-            #read header write header
-            header = p.stdout.readline()
-            newfile.write(header)
-            #counter for observations in hashlist
-            for line in p.stdout:
-                #parse geohash to num_digits
-                if line.decode().split(',')[-2][0:num_digits] in hashlist:
-                    newfile.write(line)
-                    j= j+1
+        df.to_csv(newfile_path + newfile_name, 'wb+')
         #Delete file
         cmd='rm '+file_name
-
         deleted = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         deleted.check_returncode()
+        print('subsetted file {} succesfully'.format(newfile_name))
 
     e_time = np.round(time.time() - s_time, 0)
-    with open(newfile_path + 'results', 'w+') as resultfile:
-        resultfile.write('Elapsed seconds: '+str(e_time)+'\n')
-        resultfile.write('Total observations: '+str(j)+'\n')
+    print(e_time)
 
 if __name__ == '__main__':
     main()

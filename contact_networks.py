@@ -13,7 +13,7 @@ import time
 import io
 import math
 import json
-
+import subprocess
 
 sys.path.insert(0, 'auxiliary_functions/')
 import json_code as jjj
@@ -22,6 +22,9 @@ import dirichlet_mle as dirichlet
 def row_exploder(row, norm_factor, prior_dict):
     #return an nx3 array 
     dict_visitors = json.loads(row['visitor_home_cbgs'])
+    #FILTER FOR HOMA
+    dict_visitors = {k:v for k,v in dict_visitors.items() if v > 4}
+    #END OF FILTER FOR HOMA
     m = len(dict_visitors)
     place_id = np.array([row.name] * m).reshape((m,1))
     
@@ -43,7 +46,10 @@ def row_exploder(row, norm_factor, prior_dict):
     V = np.sum(visits_by_hour) *(np.sum([int(v) for k,v in  dict_visitors.items()])/row['raw_visitor_counts'])
       #expected contacts depends on proportion of visits from a given CBG
     observed_visitors = np.sum([value for key, value in dict_visitors.items()])
-    cbg_count = np.vstack([ [key, V*int(value)/observed_visitors] for key, value in dict_visitors.items()])
+    stack = [ [key, V*int(value)/observed_visitors] for key, value in dict_visitors.items()]
+    if len(stack) == 0:
+        return(None)
+    cbg_count = np.vstack(stack)
     #distribute unobserved visits of cbgs with 1 visit among observed cbgs
     cbg_expected_contacts = cbg_count[:,1].astype(float)*(V - cbg_count[:,1].astype(float)/2 - 1/2)*posterior_norm
     posterior_norm = np.array([posterior_norm] * m).reshape((m,1))
@@ -51,7 +57,9 @@ def row_exploder(row, norm_factor, prior_dict):
 
 def place_cbg_contacts_table(pd_patterns, norm_factor, prior_dict):
     #vstack hstack of iterrows
-    arr_ = np.vstack([row_exploder(row, norm_factor, prior_dict) for i, row in pd_patterns.iterrows() if len(row['visitor_home_cbgs']) > 2])
+    stack = [row_exploder(row, norm_factor, prior_dict) for i, row in pd_patterns.iterrows() if len(row['visitor_home_cbgs']) > 2]
+    stack = [x for x in stack if x is not None]
+    arr_ = np.vstack(stack)
     #form into a dataframe and add double indexing
     df = pd.DataFrame(arr_, columns=['safegraph_place_id', 'origin_census_block_group', 'estimated_visits', 'expected_contacts', 'posterior_norm'])
     df = df.astype({'estimated_visits': 'float64', 'expected_contacts': 'float64', 'posterior_norm': 'float64'}, copy = False)
@@ -85,7 +93,7 @@ def contact_networks(county, core_path, patterns_path):
     pattern_dates = [x[5:10] for x in sorted(os.listdir(patterns_path+'main-file-'+ county +'/'))]
     #Create visitor table, weighing daily visits by active users in the panel 
 
-    for patterns_date in pattern_dates: #FIX!
+    for patterns_date in pattern_dates:
         print("--loading patterns file {}".format(patterns_date))
         county_patterns = pd.read_csv(patterns_path+'main-file-'+ county +'/2020-{}-weekly-patterns.csv.gz'.format(patterns_date),
                 index_col='safegraph_place_id')
@@ -107,7 +115,7 @@ def contact_networks(county, core_path, patterns_path):
         place_cbgs = place_cbg_contacts_table(county_patterns, norm_factor, prior_dict)
         place_cbgs = place_cbgs.loc[place_cbgs['expected_contacts']>0]
 
-        place_cbgs[['origin_census_block_group', 'estimated_visits', 'expected_contacts']].to_csv('../stats/networks/bipartite_network_{}.csv'.format(patterns_date),
+        place_cbgs[['origin_census_block_group', 'estimated_visits', 'expected_contacts']].to_csv('../stats/time_series/networks/bipartite_network_{}.csv'.format(patterns_date),
                             index = True)
         #Now we construct non-bipartite network for the same week.
         #For each place we construct an edge list, then we aggregate with a double key
@@ -117,8 +125,13 @@ def contact_networks(county, core_path, patterns_path):
         large_df = pd.concat(temp_df, ignore_index=True)
         print('Finished merging lists of edges')
         contact_net = large_df.groupby(['origin_cbg','destination_cbg']).sum()
-        contact_net.to_csv('../stats/networks/contact_network_{}.csv'.format(patterns_date), index=True)
+        contact_net.to_csv('../stats/time_series/networks/contact_network_{}.csv'.format(patterns_date), index=True)
         print('Finished exporting networks')
+
+    cmd='aws s3 sync ../stats/time_series/ s3://edu-upenn-wattslab-covid'
+    result = subprocess.run(cmd, shell=True, universal_newlines=True)
+    result.check_returncode()   
+    print('-- Finished synching time series to bucket')
 
 if __name__ == '__main__':
     contact_networks(county = '42101',
