@@ -86,6 +86,10 @@ def main():
         newfile_name= re.sub(r'.snappy.parquet', '.csv', file_name) #remove the gzip extension?
 
         df = pq.read_table(file_name).to_pandas()
+        if np.sum([not isinstance(x,str) for x in df.geo_hash]) >0:
+            print(file_name)
+            pdb.set_trace()
+
         df['subsetter'] = [s[:num_digits] for s in df['geo_hash']]
 
         df.reset_index(inplace=True)
