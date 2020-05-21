@@ -37,11 +37,11 @@ def nightTimeStamp(t1,t2,month,day):
 Read ALL food_visits files (one by one) and obtain a long list of unique visitors
 '''
     
-def readInSiteVisitLists(path_to_json):
-    all_files = os.listdir(path_to_json)
+def readInSiteVisitLists(path_json):
+    all_files = os.listdir(path_json)
     unique_visitors = []
     for filename in all_files:
-        with open(path_to_json + filename) as fp:
+        with open(path_json + filename) as fp:
             visitorDict = json.load(fp)
         visitors = [x for y in [v['visitors'] for k,v in visitorDict.items()] for x in y]
         unique_visitors.append(list(set(visitors)))
@@ -71,15 +71,15 @@ def geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin
     return visitorDict
 
 
-def findHome(month,day,path_to_veraset,path_to_json, precision = 7, t1 = 20, t2 = 5, k = None):
-    unique_visitors = readInSiteVisitLists(path_to_json)
+def findHome(month,day,path_veraset,path_json, path_output, precision = 7, t1 = 20, t2 = 5, k = None):
+    unique_visitors = readInSiteVisitLists(path_json)
     begin_timestamp, end_timestamp = nightTimeStamp(t1,t2,month,day)    
     visitorDict = {}
-    all_files = os.listdir(path_to_veraset+month+'/'+ day +'/')
-    all_files = [name for name in all_files if re.search(r'part', name) is not None]
+    all_files = os.listdir(path_veraset+month+'/'+ day +'/')
+    all_files = sorted([name for name in all_files if re.search(r'part', name) is not None])
     
     for filename in all_files: # reads in each file and finds visitors and site visits
-        userLocationTimes = pd.read_csv(path_to_veraset+month+'/'+ day +'/'+filename, index_col = 'caid')
+        userLocationTimes = pd.read_csv(path_veraset+month+'/'+ day +'/'+filename, index_col = 'caid')
 
         visitorsInFile = userLocationTimes.index.intersection(unique_visitors).unique()
         indexes = userLocationTimes.index.intersection(unique_visitors).unique().tolist()
@@ -90,12 +90,17 @@ def findHome(month,day,path_to_veraset,path_to_json, precision = 7, t1 = 20, t2 
             visitorDict = geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,
                                                  precision,begin_timestamp,end_timestamp)
         print("Finished scanning chunk: {}".format(filename))
-    pdb.set_trace()
+
+    os.makedirs(path_output, exist_ok=True)
+    with open(path_output + 'home_freqs_{}-{}.json'.format(month,day), 'w') as fp:
+        json.dump(visitorDict, fp)
+    print('--Finished finding home frequencies for {}-{}'.format(month, day))
     return visitorDict
     
 if __name__ == '__main__':
     findHome(month = '05',
              day = '07',
-             path_to_veraset ='../../veraset-42101/',
-             path_to_json ='../../stats/findVisitsResults/')
+             path_veraset ='../../veraset-42101/',
+             path_json ='../../stats/findVisitsResults/',
+             path_output = '../../stats/findHomeResults')
         
