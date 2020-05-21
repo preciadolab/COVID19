@@ -82,10 +82,10 @@ def findHome(month,day,path_to_veraset,path_to_json, precision = 7, t1 = 20, t2 
         visitorsInFile = userLocationTimes.index.intersection(unique_visitors).unique()
         subsetOfFile = userLocationTimes.loc[userLocationTimes.index.intersection(unique_visitors).unique()]
 
+        pdb.set_trace()
         for i in range(len(visitorsInFile)):
             visitor = visitorsInFile[i]
             entriesForVisitor = subsetOfFile.loc[visitor]
-            pdb.set_trace()
             if len(entriesForVisitor.geo_hash) != 9:
                 visitorDict = geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin_timestamp,end_timestamp)
         return visitorDict
