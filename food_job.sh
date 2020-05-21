@@ -1,6 +1,6 @@
 #!/bin/bash
 #$ -S /bin/bash      # <- use bash shell
-#$ -N paco_job		 # <- name of job
+#$ -N food_job		 # <- name of job
 #$ -cwd              # <- run job 'here' (required!!)
 #$ -t 1-49           # <- array job first-last
 #$ -o output/output_$TASK_ID.out  # <- output file
