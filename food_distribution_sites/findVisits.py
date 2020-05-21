@@ -188,8 +188,8 @@ def findVisits(day, month, path_veraset, path_output, k = None):
 
 if __name__ == '__main__':
     for k in range(2,50):
-    findVisits(day = '07',
-               month = '04',
-               path_veraset = '../../veraset-42101/',
-               path_output = '../../stats/findVisitsResults/',
-               k = k) 
+        findVisits(day = '07',
+                   month = '04',
+                   path_veraset = '../../veraset-42101/',
+                   path_output = '../../stats/findVisitsResults/',
+                   k = k) 
