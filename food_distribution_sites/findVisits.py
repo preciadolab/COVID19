@@ -33,7 +33,7 @@ Useful Functions for Script:
 Convert Time from 1970 time to EST
 """
 def convertToEasternTime(userList):
-    timeList = pd.to_datetime(userList.utc_timestamp,unit='s')
+    timeList = pd.to_datetime(userList.utc_timestamp, unit='s')
     timeList = timeList.dt.tz_localize('UTC').dt.tz_convert('US/Eastern')
     return timeList
 
@@ -53,9 +53,7 @@ This function returns a boolean with True (visit occurred) or False (if visit di
 """
 def checkVisitTimes(t1,t2):
     """
-    This block takes in inputs and decomposes them into time in the format
-    of numbers, eg. 12:15 --> 12.25, or 10:35 --> 10.583333. This also takes 
-    in site hours and checks if it is open during the given day that the ping
+    Transform input times into hours and checks if it is open during the given day that the ping
     occurs.
     """
     temp = re.findall(r'\d+', t2)
@@ -149,11 +147,11 @@ def readInKey(filename):
     siteLocationTimes['times'] = times
     return siteLocationTimes
 
-def findVisits(day , month, path):
+def findVisits(day , month, path_veraset, path_output):
     """
     Read in the csv files and stores the geohash and time of the visit, sequentially
     """
-    all_files = os.listdir(path+month+'\\'+day+'\\')
+    all_files = os.listdir(path_veraset + month+'/'+day+'/')
     all_files = [name for name in all_files if re.search(r'part', name) is not None]
     
     '''
@@ -165,13 +163,14 @@ def findVisits(day , month, path):
     totalVisits = 0 # initialize total number of visits per day.
     
     for filename in all_files: # reads in each file and finds visitors and site visits
-        userLocationTimes = pd.read_csv(path+month+'\\'+day+'\\'+filename,index_col = None, header = 0)
+        userLocationTimes = pd.read_csv(path_veraset+month+'/'+day+'/'+filename , index_col = None)
         userLocationTimes['converted_times'] = convertToEasternTime(userLocationTimes)  # This part takes in the time from 1970 and converts it to a day-time object.
         visitorDict , totalVisits = checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,7)
     
-    with open('..\\stats\\findVisitsResults\\food_visits_{}-{}.json'.format(month,day), 'w') as fp:
+    os.makedirs(path_output, exist_ok=True)
+    with open(path_output + 'food_visits_{}-{}.json'.format(month,day), 'w') as fp:
         json.dump(visitorDict, fp)
     print('Finished finding visits for {}-{}'.format(month, day))
 
 if __name__ == '__main__':
-    findVisits(day = '24', month = '02', path = '..\data\Veraset\\') 
+    findVisits(day = '24', month = '04', path_veraset = '../../veraset-42101/', path_output = '../../stats/findVisitsResults/') 
