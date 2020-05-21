@@ -92,11 +92,11 @@ def main():
         df.set_index('subsetter', drop = True, inplace = True)
         hashlist_local = df.index.unique()
         hashlist_local = [hash_ for hash_ in hashlist if hash_ in hashlist_local]
-        df_list = [df.loc[[hash_]] for hash_ in hashlist_local]
+        df.loc[hashlist_local]
+        df.set_index('index', drop = True, inplace=True)
         pdb.set_trace()
         
-        df = pd.concat(df_list, ignore_index = True)
-        df.set_index('index', drop = True, inplace=True)
+
 
         #subset to hashlist
         if np.sum([not isinstance(x,str) for x in df.geo_hash]) >0:
