@@ -103,10 +103,10 @@ def geohashIntersections(userLocationTimes,siteLocationTimes,prec):
 '''
 
 def checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,prec):
-
-    userLocationTimes, geoHashIntersections = geohashIntersections(userLocationTimes,siteLocationTimes,prec)
     if np.sum([not isinstance(x,str) for x in userLocationTimes.geo_hash]) >0:
         pdb.set_trace()
+    userLocationTimes, geoHashIntersections = geohashIntersections(userLocationTimes,siteLocationTimes,prec)
+
     intersectionEntries = userLocationTimes.loc[geoHashIntersections]
     uniqueIDs = intersectionEntries.loc[geoHashIntersections].caid.unique()
     #print(uniqueIDs[0])
