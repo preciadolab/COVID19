@@ -79,15 +79,16 @@ def findHome(month,day,path_to_veraset,path_to_json, precision = 7, t1 = 20, t2 
         userLocationTimes = pd.read_csv(path_to_veraset+month+'/'+ day +'/'+filename, index_col = 'caid')
 
         visitorsInFile = userLocationTimes.index.intersection(unique_visitors).unique()
-        pdb.set_trace()
-        subsetOfFile = userLocationTimes.loc[[userLocationTimes.index.intersection(unique_visitors).unique().tolist()]]
+        indexes = userLocationTimes.index.intersection(unique_visitors).unique().tolist()
+        subsetOfFile = userLocationTimes.loc[indexes]
 
-        for i in range(len(visitorsInFile)):
-            visitor = visitorsInFile[i]
-            entriesForVisitor = subsetOfFile.loc[visitor]
-            if len(entriesForVisitor.geo_hash) != 9:
-                visitorDict = geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin_timestamp,end_timestamp)
-        return visitorDict
+        for visitor in visitorsInFile:
+            entriesForVisitor = subsetOfFile.loc[[visitor]]
+            visitorDict = geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,
+                                                 precision,begin_timestamp,end_timestamp)
+
+    pdb.set_trace()
+    return visitorDict
     
 if __name__ == '__main__':
     findHome(month = '05',
