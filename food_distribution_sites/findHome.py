@@ -139,4 +139,4 @@ def main():
              path_output = '../../stats/findHomeResults/')
 
 if __name__ == '__main__':
-        
+    main()
