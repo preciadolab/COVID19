@@ -9,7 +9,7 @@ import pandas as pd
 import gzip as gz
 import subprocess
 import pdb
-import time
+from time import strftime
 import io
 import json
 import re
@@ -19,6 +19,7 @@ sys.path.insert(0, 'auxiliary_functions/')
 sys.path.insert(0, 'subsets_and_joins/')
 sys.path.insert(0, './')
 from subset_core_places import subset_core_places
+from data_structuring import split_time_series
 from subset_patterns import subset_patterns
 from subset_social_dist import subset_social_dist
 from compliance_time_series import *
@@ -27,7 +28,9 @@ from sync_caseloads import sync_caseloads
 def main():
     #Sync weekly_patterns files from Safegraph
     print('-- Synching weekly patterns')
-    cmd='aws s3 sync s3://sg-c19-response/weekly-patterns/v1/ ../weekly_patterns/ --profile safegraph_consortium'
+    #Only update 2020 pattern files
+
+    cmd='aws s3 sync s3://sg-c19-response/weekly-patterns/v2/ ../weekly_patterns/ --exclude "*201*" --profile safegraph_consortium'
     result = subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, universal_newlines=True)
     result.check_returncode()
     print('-- Finished synching weekly patterns')
@@ -42,15 +45,19 @@ def main():
 
     #Sync core_places files from Safegraph
     print('-- Synching core places')
-    cmd= 'aws s3 sync s3://sg-c19-response/core/2020/'+ time.strftime("%m")+'/ ../core_places/ --profile safegraph_consortium '
-    result = subprocess.run(cmd, shell=True, universal_newlines=True)
-    result.check_returncode()    
-    print('--Finished synching core places')
-    #delete current core objects?
-    zip_file = [x for x in os.listdir('../core_places/') if re.search(r'CorePlaces', x) is not None][0]
-    cmd= 'unzip -o -j ../core_places/'+zip_file+' -d ../core_places/'
-    result = subprocess.run(cmd, shell=True, universal_newlines=True)
-    result.check_returncode()
+    core_list = os.listdir('../core_places/')
+    if any([re.search(r'2020-{}'.format(strftime("%m")), x) is not None for x in core_list]):
+        print('-- Core places up to date')
+    else:
+        cmd= 'aws s3 sync s3://sg-c19-response/core/2020/{}/ ../core_places/ --profile safegraph_consortium '.format(strftime("%m"))
+        result = subprocess.run(cmd, shell=True, universal_newlines=True)
+        result.check_returncode()    
+        print('--Finished synching core places')
+        #delete current core objects?
+        zip_file = [x for x in os.listdir('../core_places/') if re.search(r'CorePlaces', x) is not None][0]
+        cmd= 'unzip -o -j ../core_places/'+zip_file+' -d ../core_places/'
+        result = subprocess.run(cmd, shell=True, universal_newlines=True)
+        result.check_returncode()
 
     #Sync social distancing metrics 
     print('-- Synching social distancing data')
@@ -75,7 +82,6 @@ def main():
                               pattern_path = '../weekly_patterns/',
                               county= county,
                               backfill=False))
-
         #subset social distancing metrics for county
         print("subsetting social distancing metrics for county {}".format(county))
         print(subset_social_dist(soc_dist_path = '../social_distancing/',
@@ -87,7 +93,10 @@ def main():
         compliance_time_series(county = county,
                                core_path = '../core_places/',
                                patterns_path = '../weekly_patterns/',
-                               backfill = True)
+                               backfill = False,
+                               GEOID_type = 'CT')
+
+        print(split_time_series(county = county, GEOID_type = 'CT'))
 
         print(sync_caseloads(county = county))
 

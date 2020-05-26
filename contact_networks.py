@@ -19,15 +19,33 @@ sys.path.insert(0, 'auxiliary_functions/')
 import json_code as jjj
 import dirichlet_mle as dirichlet
 
-def row_exploder(row, norm_factor, prior_dict):
+def row_exploder_plain(row):
+    dict_visitors = json.loads(row['visitor_home_cbgs'])   
+    m = len(dict_visitors) 
+
+    stack = [ [key, int(value)] for key, value in dict_visitors.items()]
+    cbg_count = np.vstack(stack)
+    place_id = np.array([row.name]*m).reshape((m,1))
+
+    return(np.hstack([place_id,cbg_count]))
+
+def row_exploder(row, norm_factor, prior_dict, GEOID_type = 'CBG'):
     #return an nx3 array 
     dict_visitors = json.loads(row['visitor_home_cbgs'])
-    #FILTER FOR HOMA
-    dict_visitors = {k:v for k,v in dict_visitors.items() if v > 4}
-    #END OF FILTER FOR HOMA
+    #dict_visitors = {k:v for k,v in dict_visitors.items() if v > 4}
+
+    if GEOID_type == 'CT': #aggregate to census tracts
+        dict_visitors_ct = {}
+        for cbg, count in dict_visitors.items():
+            if cbg[:-1] in dict_visitors_ct.keys():
+                dict_visitors_ct[cbg[:-1]]+= count
+            else:
+                dict_visitors_ct[cbg[:-1]] = count
+        dict_visitors = dict_visitors_ct
+
     m = len(dict_visitors)
     place_id = np.array([row.name] * m).reshape((m,1))
-    
+
     #count number of contacts scaling by norm_factor
     visits_by_hour = np.array(json.loads(row['visits_by_each_hour']))* norm_factor
     if isinstance(row['top_category'],str):
@@ -50,22 +68,46 @@ def row_exploder(row, norm_factor, prior_dict):
     if len(stack) == 0:
         return(None)
     cbg_count = np.vstack(stack)
+    if GEOID_type == 'CT' or plain_visits:
+        return(np.hstack([place_id,cbg_count]))
+
     #distribute unobserved visits of cbgs with 1 visit among observed cbgs
     cbg_expected_contacts = cbg_count[:,1].astype(float)*(V - cbg_count[:,1].astype(float)/2 - 1/2)*posterior_norm
     posterior_norm = np.array([posterior_norm] * m).reshape((m,1))
     return(np.hstack([place_id,cbg_count, cbg_expected_contacts.reshape((m,1)), posterior_norm]))
 
-def place_cbg_contacts_table(pd_patterns, norm_factor, prior_dict):
+def place_cbg_contacts_table(pd_patterns, norm_factor, prior_dict, GEOID_type = 'CBG', plain_visits = False):
     #vstack hstack of iterrows
-    stack = [row_exploder(row, norm_factor, prior_dict) for i, row in pd_patterns.iterrows() if len(row['visitor_home_cbgs']) > 2]
+    if plain_visits:
+        stack = [row_exploder_plain(row) for i, row in pd_patterns.iterrows() if len(row['visitor_home_cbgs']) > 2]
+    else:
+        stack = [row_exploder(row, norm_factor, prior_dict, GEOID_type = 'CBG') for i, row in pd_patterns.iterrows() if len(row['visitor_home_cbgs']) > 2]
+    
     stack = [x for x in stack if x is not None]
     arr_ = np.vstack(stack)
     #form into a dataframe and add double indexing
-    df = pd.DataFrame(arr_, columns=['safegraph_place_id', 'origin_census_block_group', 'estimated_visits', 'expected_contacts', 'posterior_norm'])
-    df = df.astype({'estimated_visits': 'float64', 'expected_contacts': 'float64', 'posterior_norm': 'float64'}, copy = False)
+    if plain_visits:
+        df = pd.DataFrame(arr_, columns=['safegraph_place_id', 'origin_census_block_group', 'estimated_visits'])
+        df = df.astype({'estimated_visits': 'float64'}, copy = False)
+    else:
+        df = pd.DataFrame(arr_, columns=['safegraph_place_id', 'origin_census_block_group', 'estimated_visits', 'expected_contacts', 'posterior_norm'])
+        df = df.astype({'estimated_visits': 'float64', 'expected_contacts': 'float64', 'posterior_norm': 'float64'}, copy = False)
     #set origin_census_block_group as index
     df.set_index('safegraph_place_id', drop= True, inplace = True)
     return(df)
+
+def place_ct_contacts_table(pd_patterns, norm_factor, prior_dict):
+    #vstack hstack of iterrows
+    stack = [row_exploder(row, norm_factor, prior_dict, GEOID_type = 'CT') for i, row in pd_patterns.iterrows() if len(row['visitor_home_cbgs']) > 2]
+    stack = [x for x in stack if x is not None]
+    arr_ = np.vstack(stack)
+    #form into a dataframe and add double indexing
+    df = pd.DataFrame(arr_, columns=['safegraph_place_id', 'origin_census_tract', 'estimated_visits'])
+    df = df.astype({'estimated_visits': 'float64'}, copy = False)
+    #set origin_census_block_group as index
+    df.set_index('safegraph_place_id', drop= True, inplace = True)
+    return(df)
+
 
 def edge_creator(row, contact_weights, self_index):
     contact_weights[self_index] = (contact_weights[self_index] -1)/2

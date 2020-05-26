@@ -1,0 +1,1 @@
+{"type": "cbg", "low_device_count": {"March_31": true}, "covid": {"March_31": {"pct_at_home": 0.5, "pct_within_neighborhood": 0.67, "median_distance_traveled": 11130.0, "median_percentage_time_home": 60, "total_visits_to_places": 0, "normalized_visits_to_places": 0.0, "total_expected_contacts": 0, "places_visited": {}, "cbgs_visited": {"421010167024": 6}}}}
