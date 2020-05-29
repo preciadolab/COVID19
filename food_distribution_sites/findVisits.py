@@ -137,6 +137,7 @@ def readInKey(filename):
     with sf as shp:
         shape = shp.shapes()
         shpRecords = shp.shapeRecords()
+        #Take point, draw a radius ~
         for i in range(len(shape)):
             geohashes.append(gh.encode(shape[i].points[0][1],shape[i].points[0][0],precision = 7))
             times.append(shpRecords[i].record[6:13])
@@ -187,7 +188,8 @@ def findVisits(day, month, path_veraset, path_output, k = None):
     print('--Finished finding visits for {}-{}, found {} visits'.format(month, day, totalVisits))
 
 if __name__ == '__main__':
-    for k in range(31,50):
+    daylist= list(range(1,8)).append(list(range(48, 56)))
+    for k in list(range(1,8)) + list(range(48,56)):
         findVisits(day = '07',
                    month = '04',
                    path_veraset = '../../veraset-42101/',

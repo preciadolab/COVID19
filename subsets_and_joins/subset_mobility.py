@@ -64,7 +64,7 @@ def main():
     file_list = sorted([nam for nam in file_list if nam[:4] == 'part'])
 
     #Create local folder to output filtered data
-    newfile_path = '../veraset-42101/'+ month +'/'+ day +'/'
+    newfile_path = '../../veraset-42101/'+ month +'/'+ day +'/'
     os.makedirs(newfile_path, exist_ok=True)
 
     #find geohashes for Philadelphia and surrounding
