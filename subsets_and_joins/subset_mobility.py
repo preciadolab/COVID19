@@ -14,6 +14,7 @@ import pdb
 import pyarrow.parquet as pq
 import re
 import json
+from shapely.geometry import shape
 
 sys.path.insert(0, '../auxiliary_functions/')
 sys.path.insert(0, './')
