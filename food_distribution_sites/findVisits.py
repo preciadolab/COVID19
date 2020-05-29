@@ -188,7 +188,7 @@ def findVisits(day, month, path_veraset, path_output, k = None):
     print('--Finished finding visits for {}-{}, found {} visits'.format(month, day, totalVisits))
 
 if __name__ == '__main__':
-    daylist= list(range(18,26)).append(list(range(48, 56)))
+    daylist= list(range(18,26))+list(range(48, 56))
     for k in daylist:
         findVisits(day = '07',
                    month = '04',
