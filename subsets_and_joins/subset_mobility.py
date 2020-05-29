@@ -68,7 +68,7 @@ def main():
     os.makedirs(newfile_path, exist_ok=True)
 
     #find geohashes for Philadelphia and surrounding
-    
+    print("subsetting to places in: 42101, 42045, 42091")
     with open('../../core_places/censusBlockGroups.geojson') as fp:
         geojson = json.load(fp)
     cb_polygon_dict = {}
