@@ -77,8 +77,9 @@ def main():
             cb_polygon_dict[geojson['features'][i]['properties']['GEOID']] =  geojson['features'][i]['geometry']
 
     cb_polygon_dict = { k:shape(v) for k,v in cb_polygon_dict.items()}
+    polygon_list = [v for k,v in cb_polygon_dict.items()]
     precision = 5
-    hashset = polygons_to_geohash(polygon_list = cb_polygon_dict,
+    hashset = polygons_to_geohash(polygon_list = polygon_list,
                                   precision = precision)
     
 
