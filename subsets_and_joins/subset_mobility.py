@@ -13,7 +13,7 @@ import io
 import pdb
 import pyarrow.parquet as pq
 import re
-sys.path.insert(0, 'auxiliary_functions/')
+sys.path.insert(0, '../auxiliary_functions/')
 sys.path.insert(0, './')
 from spatial_functions import polygons_to_geohash
 
