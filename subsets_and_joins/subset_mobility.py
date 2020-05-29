@@ -13,6 +13,10 @@ import io
 import pdb
 import pyarrow.parquet as pq
 import re
+sys.path.insert(0, 'auxiliary_functions/')
+sys.path.insert(0, './')
+from spatial_functions import 
+
 
 def main():
     argument_list = sys.argv[1:]
@@ -60,20 +64,23 @@ def main():
     newfile_path = '../../veraset-42101/'+ month +'/'+ day +'/'
     os.makedirs(newfile_path, exist_ok=True)
 
-    #Verify that list of hashes is of the same length
-    hashlist= ['dr47p', 'dr47q', 'dr47r', 'dr47x', 'dr47z', 'd34e0', 'd34e1', 'd34e2', 'd34e3', 'd34e4',
-                   'd34e5', 'd34e6', 'd34e7', 'd34e8', 'd34e9', 'd34eb', 'd34ec', 'd34ed', 'd34ee', 'd34ef',
-                   'd34eg', 'd34es', 'd34es', 'd34et', 'd34eu', 'd34ev', 'd346z', 'd34db', 'd34dc', 'd34df',
-                   'd34s0', 'd34s5', 'd34sh', 'd34sj', 'd34sn', 'd34sk', 'd34sm']
-    if len(set([len(x) for x in hashlist])) != 1:
-        sys.exit("NameError: Geohashes are of different length")
-    num_digits = len(list(hashlist)[0])
+    #find geohashes for Philadelphia and surrounding
+    
+    with open('../../core_places/censusBlockGroups.geojson') as fp:
+        geojson = json.load(fp)
+    cb_polygon_dict = {}
+    for i in range(len(geojson['features'])):
+        if geojson['features'][i]['properties']['GEOID'][:5] in ['42101','42045','42091']:
+            cb_polygon_dict[geojson['features'][i]['properties']['GEOID']] =  geojson['features'][i]['geometry']
+
+    cb_polygon_dict = { k:shape(v) for k,v in cb_polygon_dict.items()}
+    precision = 5
+    hashset = polygons_to_geohash(polygon_list = cb_polygon_dict,
+                                  precision = precision)
+    
 
     #Iterate through file_list
-    s_time=time.time()
     print("Starting subset on {} chunks".format(len(file_list)))
-    j= 0
-
     for file_name in file_list:
         if int(month) > 5 or (int(month) >= 5 and int(day) >= 4): 
             cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' + file_name + ' ./ --profile veraset' 
@@ -86,16 +93,16 @@ def main():
         newfile_name= re.sub(r'.snappy.parquet', '.csv', file_name) #remove the gzip extension?
 
         df = pq.read_table(file_name).to_pandas()
-        df['subsetter'] = [s[:num_digits] for s in df['geo_hash']]
+        df['subsetter'] = [s[:precision] for s in df['geo_hash']]
 
         df.reset_index(inplace=True)
         df.set_index('subsetter', drop = True, inplace = True)
-        hashlist_local = df.index.unique()
-        hashlist_local = [hash_ for hash_ in hashlist if hash_ in hashlist_local]
-        df = df.loc[hashlist_local]
+        hashset_local = df.index.unique()
+        hashset_local = [hash_ for hash_ in hashset if hash_ in hashset_local]
+        df = df.loc[hashset_local]
         df.set_index('index', drop = True, inplace=True)
 
-        #subset to hashlist
+        #subset to hashset
         if np.sum([not isinstance(x,str) for x in df.geo_hash]) >0:
             sys.exit('--Error: {} contains non-strings in the geohash field'.format(newfile_name))
 
