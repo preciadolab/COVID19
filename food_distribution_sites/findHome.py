@@ -74,7 +74,7 @@ def geoHashTimesForVisitor(visitor,entriesForVisitor,visitorDict,precision,begin
     return visitorDict
 
 
-def findHome(month,day,path_veraset,path_json, path_output, precision = 7, t1 = 20, t2 = 5):
+def findHome(month,day,path_veraset,path_json, path_output, precision = 7, t1 = 20, t2 = 6):
     unique_visitors = readInSiteVisitLists(path_json)
     begin_timestamp, end_timestamp = nightTimeStamp(t1,t2,month,day)    
     visitorDict = {}
@@ -134,9 +134,9 @@ def main():
 
     findHome(month = month,
              day = day,
-             path_veraset ='../../veraset-42101/',
-             path_json ='../../stats/findVisitsResults/',
-             path_output = '../../stats/findHomeResults/')
+             path_veraset = '../../veraset-42101/',
+             path_json =    '../../stats/findVisitsResults/',
+             path_output =  '../../stats/findHomeResults/')
 
 if __name__ == '__main__':
     main()
