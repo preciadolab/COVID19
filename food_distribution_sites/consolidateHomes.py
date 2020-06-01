@@ -63,9 +63,8 @@ def main(path_json, path_output):
 
     cb_polygon_dict = { k:shape(v) for k,v in cb_polygon_dict.items()}
 
-    df['home_cbg'] = [home_to_cbg(home_geohash, cb_POLYGON_dict) for home_geohash in df['home_geohash']]
+    df['home_cbg'] = [home_to_cbg(home_geohash, cb_polygon_dict) for home_geohash in df['home_geohash']]
 
-    pdb.set_trace()
     df.to_csv(path_output + 'user_homes_upd.csv', index = False)
 
 if __name__ == '__main__':
