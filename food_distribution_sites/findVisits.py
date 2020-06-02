@@ -134,11 +134,13 @@ def readInKey(filename):
     times = [] # list of times
     names = [] # list of names of sites
     
+    pdb.set_trace()
     with sf as shp:
         shape = shp.shapes()
         shpRecords = shp.shapeRecords()
         #Take point, draw a radius ~
         for i in range(len(shape)):
+            #also add lat and lon to dict
             geohashes.append(gh.encode(shape[i].points[0][1],shape[i].points[0][0],precision = 7))
             times.append(shpRecords[i].record[6:13])
             names.append(shpRecords[i].record[1])
@@ -169,7 +171,7 @@ def findVisits(day, month, path_veraset, path_output, k = None):
     '''
     Initialization Block
     '''
-    siteLocationTimes = readInKey('COVID19_FreeMealSites')
+    siteLocationTimes = readInKey('mealsites/COVID19_FreeMealSites')
     visitorDict = { geohash:{'name':name,'visits':0,'visitors':[]} for name, geohash in zip(siteLocationTimes.index.tolist(),siteLocationTimes.geo_hash.tolist())} 
     print('Finding visits for {} locations'.format(len(visitorDict)))
     totalVisits = 0 # initialize total number of visits per day.

@@ -6,11 +6,8 @@ import numpy.random as npr
 import getopt, sys
 import os
 import pandas as pd
-import gzip as gz
-import subprocess
 import pdb
 import time
-import io
 
 
 sys.path.insert(0, '../auxiliary_functions/')
