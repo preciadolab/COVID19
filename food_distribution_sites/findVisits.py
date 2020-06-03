@@ -13,7 +13,7 @@ and checks if a given user visited any of the sites during the specified windows
 that it is open. If there is a visit, this code reports the user, the site,
 and the time of the visit. 
 """
-
+import sys
 import shapefile
 import json
 import re
@@ -25,6 +25,13 @@ import numpy as np
 import pdb
 import os
 
+from shapely.ops import transform
+from shapely.geometry import shape
+from functools import partial
+import pyproj    
+
+sys.path.insert(0, '..')
+from auxiliary_functions.spatial_functions import polygon_area
 """
 Useful Functions for Script:
 """
@@ -127,8 +134,38 @@ def checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,prec
 This function reads in the shape files with the opening times and locations of sites, 
 and converts coordinates into geohashes.
 """
+def shp_into_dict(filename):
+    with shapefile.Reader(filename) as sf:
+        # name of fields
+        fields = sf.fields[1:] 
+        field_names = [field[0] for field in fields]
+        shp_dict = {}
+        #To do: read from proj file
+        proj = partial(pyproj.transform, pyproj.Proj(init='epsg:3857'),
+           pyproj.Proj(init='epsg:4326')) #to project back into lat, lon
+        for r in sf.shapeRecords():
+             atr = dict(zip(field_names, r.record))
+             geom = r.shape.__geo_interface__ #Is in EPSG:4326
+             geom = transform(proj, shape(geom)).__geo_interface__
+             #No ID, so we use geohash9 of centroid
+             geoid = gh.encode(
+                shape(geom).centroid.coords[0][1],
+                shape(geom).centroid.coords[0][0],
+                precision = 9)
+             shp_dict[geoid] = {'features':atr, 'geometry':geom}
 
-def readInKey(filename):
+    pdb.set_trace()        
+    return(shp_dict)
+
+def points_to_gh7(shp_dict):
+    """
+    Maps point geometries into the geohash7 tile that contains them. 
+    Key values are GEOID and fields include the geohash, as well as optional
+    parameters like name and times of operation
+    Params:
+      shp_dict: dict
+                dictionary with shapefiles in geo_interface format
+    """
     sf = shapefile.Reader(filename)
     geohashes = [] # list of site geohashes
     times = [] # list of times
@@ -150,7 +187,7 @@ def readInKey(filename):
     siteLocationTimes['times'] = times
     return siteLocationTimes
 
-def findVisits(day, month, path_veraset, path_output, k = None):
+def findVisits(day, month, path_veraset, path_output, path_meals, k = None):
     """
     Read in the csv files and stores the geohash and time of the visit, sequentially
     """
@@ -171,7 +208,11 @@ def findVisits(day, month, path_veraset, path_output, k = None):
     '''
     Initialization Block
     '''
-    siteLocationTimes = readInKey('mealsites/COVID19_FreeMealSites')
+    shp_dict_all = shp_into_dict(path_meals + 'OtherMealSites_All')
+    shp_dict_youths = shp_into_dict(path_meals + 'YouthMealSites_All')
+
+    pdb.set_trace()
+    siteLocationTimes = findVisits(shp_dict)
     visitorDict = { geohash:{'name':name,'visits':0,'visitors':[]} for name, geohash in zip(siteLocationTimes.index.tolist(),siteLocationTimes.geo_hash.tolist())} 
     print('Finding visits for {} locations'.format(len(visitorDict)))
     totalVisits = 0 # initialize total number of visits per day.
@@ -189,11 +230,21 @@ def findVisits(day, month, path_veraset, path_output, k = None):
         json.dump(visitorDict, fp)
     print('--Finished finding visits for {}-{}, found {} visits'.format(month, day, totalVisits))
 
+# if __name__ == '__main__':
+#     daylist= list(range(18,26))+list(range(48, 56))
+#     for k in daylist:
+#         findVisits(day='04',
+#                    month='05',
+#                    path_veraset='../../veraset-42101/',
+#                    path_meals='../../meal_sites/',
+#                    path_output='../../stats/findVisitsResults/',
+#                    k = k) 
+
 if __name__ == '__main__':
-    daylist= list(range(18,26))+list(range(48, 56))
-    for k in daylist:
-        findVisits(day = '07',
-                   month = '04',
-                   path_veraset = '../../veraset-42101/',
-                   path_output = '../../stats/findVisitsResults/',
-                   k = k) 
+    findVisits(day='04',
+               month='05',
+               path_veraset='../../veraset-42101/',
+               path_meals='../../food_sites/',
+               path_output='../../stats/findVisitsResults/',
+               k = None) 
+

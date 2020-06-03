@@ -30,6 +30,8 @@ def polygon_area(wkt): #square meters
     s_new = transform(proj, s)
     return(s_new.area)
 
+
+
 def polygons_to_geohash(polygon_list, precision = 5):
     if not type(polygon_list) == list:
         print ('input must be a list')
