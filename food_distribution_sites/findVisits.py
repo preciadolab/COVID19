@@ -31,7 +31,7 @@ from functools import partial
 import pyproj    
 
 sys.path.insert(0, '..')
-from auxiliary_functions.spatial_functions import polygon_area, point_to_circle, polygon_to_geohash
+from auxiliary_functions.spatial_functions import polygon_area, point_to_circle, polygons_to_geohash
 """
 Useful Functions for Script:
 """
