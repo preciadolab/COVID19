@@ -32,6 +32,7 @@ import pyproj
 
 sys.path.insert(0, '..')
 from auxiliary_functions.spatial_functions import polygon_area
+from auxiliary_functions.data_structuring import merge_dicts
 """
 Useful Functions for Script:
 """
@@ -39,6 +40,8 @@ Useful Functions for Script:
 """
 Convert Time from 1970 time to EST
 """
+week_days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY',
+             'FRIDAY', 'SATURDAY', 'SUNDAY']
 def convertToEasternTime(userList):
     timeList = pd.to_datetime(userList.utc_timestamp, unit='s')
     timeList = timeList.dt.tz_localize('UTC').dt.tz_convert('US/Eastern')
@@ -139,12 +142,19 @@ def shp_into_dict(filename):
         # name of fields
         fields = sf.fields[1:] 
         field_names = [field[0] for field in fields]
+        field_names = [re.sub(r'SiteName','site_name',x) for x in field_names]
+        #youth sites don't have opening hours fields
+        if 'MONDAY' not in field_names:
+            atr_empty_days = dict(zip(week_days, ['']*7))
+        else:
+            atr_empty_days = {}
         shp_dict = {}
         #To do: read from proj file
         proj = partial(pyproj.transform, pyproj.Proj(init='epsg:3857'),
            pyproj.Proj(init='epsg:4326')) #to project back into lat, lon
         for r in sf.shapeRecords():
              atr = dict(zip(field_names, r.record))
+             merge_dicts(atr, atr_empty_days)
              geom = r.shape.__geo_interface__ #Is in EPSG:4326
              geom = transform(proj, shape(geom)).__geo_interface__
              #No ID, so we use geohash9 of centroid
@@ -153,10 +163,9 @@ def shp_into_dict(filename):
                 shape(geom).centroid.coords[0][0],
                 precision = 9)
              shp_dict[geoid] = {'features':atr, 'geometry':geom}
-      
     return(shp_dict)
 
-def points_to_gh7(filename):
+def points_to_gh7(shp_dict):
     """
     Maps point geometries into the geohash7 tile that contains them. 
     Key values are GEOID and fields include the geohash, as well as optional
@@ -165,24 +174,11 @@ def points_to_gh7(filename):
       shp_dict: dict
                 dictionary with shapefiles in geo_interface format
     """
-    sf = shapefile.Reader(filename)
-    geohashes = [] # list of site geohashes
-    times = [] # list of times
-    names = [] # list of names of sites
-    
-    with sf as shp:
-        shape = shp.shapes()
-        shpRecords = shp.shapeRecords()
-        #Take point, draw a radius ~
-        for i in range(len(shape)):
-            #also add lat and lon to dict
-            #geohashes.append(gh.encode(shape[i].points[0][1],shape[i].points[0][0],precision = 7))
-            times.append(shpRecords[i].record[6:13])
-            names.append(shpRecords[i].record[1])
-    pdb.set_trace()
-    siteLocationTimes = pd.DataFrame(index = names)
-    siteLocationTimes['geo_hash'] = geohashes
-    siteLocationTimes['times'] = times
+    siteLocationTimes = pd.DataFrame(
+        index = [v['features']['site_name'] for k,v in shp_dict.items()])
+    siteLocationTimes['geo_hash'] = [k[:7] for k,v in shp_dict.items()]
+    siteLocationTimes['times'] = [ [v2 for k2, v2 in v1['features'].items() if
+        k2 in week_days] for k1, v1 in shp_dict.items()]
     return siteLocationTimes
 
 """
@@ -230,11 +226,13 @@ def findVisits(day, month, path_veraset, path_output, path_meals, k = None):
     '''
     Initialization Block
     '''
-    shp_dict_all = shp_into_dict(path_meals + 'OtherMealSites_All')
     shp_dict_youths = shp_into_dict(path_meals + 'YouthMealSites_All')
+    shp_dict_all = shp_into_dict(path_meals + 'OtherMealSites_All')
+    
 
-    pdb.set_trace()
-    siteLocationTimes = points_to_gh7(path_meals + 'OtherMealSites_All')
+    shp_meal_sites = merge_dicts(shp_dict_all, shp_dict_youths)
+
+    siteLocationTimes = points_to_gh7(shp_meal_sites)
     visitorDict = { geohash:{'name':name,'visits':0,'visitors':[]} for name, geohash in zip(siteLocationTimes.index.tolist(),siteLocationTimes.geo_hash.tolist())} 
     print('Finding visits for {} locations'.format(len(visitorDict)))
     totalVisits = 0 # initialize total number of visits per day.
