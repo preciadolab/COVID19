@@ -110,6 +110,7 @@ def main(json_path, patterns_path, output_path):
         counts = home_cbg.loc[dict_['visitors'], 'home_cbg'].value_counts()
         dict_['visitor_cbg'] = counts[counts > 1].to_dict()
         dict_.pop('visitors', None)
+    #put breakpoint here
     food_js = {k:v for k,v in food_js.items() if len(v['visitor_cbg'])>0}
     print("{} out of 148 food sites have visits".format(len(food_js)))
     #filter out sites with no visits
