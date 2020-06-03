@@ -17,6 +17,20 @@ from shapely.geometry.polygon import Polygon
 from shapely.geometry import shape
 from functools import partial
 
+def point_to_circle(center,radius):
+    #lon, lat = -122.431297, 37.773972 # lon lat for San Francisco
+    #radius = 10000  # in m
+    epsg3857_to_epsg4326 = partial(
+        pyproj.transform, 
+        pyproj.Proj(init='epsg:3857'),
+        pyproj.Proj(init='epsg:4326')
+    )
+    epsg4326_to_epsg3857 = partial(
+        pyproj.transform, 
+        pyproj.Proj(init='epsg:4326'),
+        pyproj.Proj(init='epsg:3857')
+    )
+
 def polygon_area(wkt): #square meters
     #parse polygon
     wkt = wkt[10:-2]
