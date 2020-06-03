@@ -66,7 +66,10 @@ def checkVisitTimes(t1,t2):
     temp = re.findall(r'\d+', t2)
     t2_upd = list(map(int, temp))
     if len(t2_upd) == 0: # open always
-        return True
+        t2_upd.insert(0,7)
+        t2_upd.insert(1,0)
+        t2_upd.insert(2,4)
+        t2_upd.insert(3,0)
     elif len(t2_upd) == 2: # open at whole hours
         t2_upd.insert(1,0)
         t2_upd.insert(3,0)
