@@ -185,6 +185,30 @@ def points_to_gh7(filename):
     siteLocationTimes['times'] = times
     return siteLocationTimes
 
+"""
+This function reads in the shape files with the opening times and locations of sites, 
+and converts coordinates into a circle polygon with geohash 8.
+"""
+
+def point_to_circle_geohash_8(filename,rad,prec):
+    sf = shapefile.Reader(filename)
+    geohashes = [] # list of site geohashes
+    times = [] # list of times
+    names = [] # list of names of sites
+    
+    with sf as shp:
+        shape = shp.shapes()
+        shpRecords = shp.shapeRecords()
+        for i in range(len(shape)):
+            geohashes.append(polygons_to_geohash(point_to_circle(shape[i].points[0][1],shape[i].points[0][0],rad),precision=prec))
+            times.append(shpRecords[i].record[6:13])
+            names.append(shpRecords[i].record[1])
+            
+    siteLocationTimes = pd.DataFrame(index = names)
+    siteLocationTimes['geo_hash'] = geohashes
+    siteLocationTimes['times'] = times
+    return siteLocationTimes
+
 def findVisits(day, month, path_veraset, path_output, path_meals, k = None):
     """
     Read in the csv files and stores the geohash and time of the visit, sequentially
