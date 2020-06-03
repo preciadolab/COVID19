@@ -200,7 +200,7 @@ def point_to_circle_geohash_8(filename,rad,prec):
         shape = shp.shapes()
         shpRecords = shp.shapeRecords()
         for i in range(len(shape)):
-            geohashes.append(polygons_to_geohash(point_to_circle(shape[i].points[0][1],shape[i].points[0][0],rad),precision=prec))
+            geohashes.append(polygons_to_geohash(point_to_circle(shape,rad),precision=prec))
             times.append(shpRecords[i].record[6:13])
             names.append(shpRecords[i].record[1])
             
