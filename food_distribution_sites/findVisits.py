@@ -153,11 +153,10 @@ def shp_into_dict(filename):
                 shape(geom).centroid.coords[0][0],
                 precision = 9)
              shp_dict[geoid] = {'features':atr, 'geometry':geom}
-
-    pdb.set_trace()        
+      
     return(shp_dict)
 
-def points_to_gh7(shp_dict):
+def points_to_gh7(filename):
     """
     Maps point geometries into the geohash7 tile that contains them. 
     Key values are GEOID and fields include the geohash, as well as optional
@@ -171,17 +170,16 @@ def points_to_gh7(shp_dict):
     times = [] # list of times
     names = [] # list of names of sites
     
-    pdb.set_trace()
     with sf as shp:
         shape = shp.shapes()
         shpRecords = shp.shapeRecords()
         #Take point, draw a radius ~
         for i in range(len(shape)):
             #also add lat and lon to dict
-            geohashes.append(gh.encode(shape[i].points[0][1],shape[i].points[0][0],precision = 7))
+            #geohashes.append(gh.encode(shape[i].points[0][1],shape[i].points[0][0],precision = 7))
             times.append(shpRecords[i].record[6:13])
             names.append(shpRecords[i].record[1])
-            
+    pdb.set_trace()
     siteLocationTimes = pd.DataFrame(index = names)
     siteLocationTimes['geo_hash'] = geohashes
     siteLocationTimes['times'] = times
@@ -212,7 +210,7 @@ def findVisits(day, month, path_veraset, path_output, path_meals, k = None):
     shp_dict_youths = shp_into_dict(path_meals + 'YouthMealSites_All')
 
     pdb.set_trace()
-    siteLocationTimes = findVisits(shp_dict)
+    siteLocationTimes = points_to_gh7(path_meals + 'OtherMealSites_All')
     visitorDict = { geohash:{'name':name,'visits':0,'visitors':[]} for name, geohash in zip(siteLocationTimes.index.tolist(),siteLocationTimes.geo_hash.tolist())} 
     print('Finding visits for {} locations'.format(len(visitorDict)))
     totalVisits = 0 # initialize total number of visits per day.
