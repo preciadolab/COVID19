@@ -31,6 +31,12 @@ def point_to_circle(center,radius):
         pyproj.Proj(init='epsg:3857')
     )
 
+    point_transformed = transform(epsg4326_to_epsg3857, center)
+    buffer = point_transformed.buffer(radius)
+    # Get the polygon with lat lon coordinates
+    circle_poly = transform(epsg3857_to_epsg4326, buffer)
+    return circle_poly
+
 def polygon_area(wkt): #square meters
     #parse polygon
     wkt = wkt[10:-2]
