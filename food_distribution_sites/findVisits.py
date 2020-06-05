@@ -141,24 +141,18 @@ def checkVisits(userLocationTimes,siteLocationTimes,visitorDict,totalVisits,prec
 This function reads in the shape files with the opening times and locations of sites, 
 and converts coordinates into geohashes.
 """
-def shp_into_dict(filename):
+def shp_to_dict(filename):
     with shapefile.Reader(filename) as sf:
         # name of fields
         fields = sf.fields[1:] 
         field_names = [field[0] for field in fields]
         field_names = [re.sub(r'SiteName','site_name',x) for x in field_names]
-        #youth sites don't have opening hours fields
-        if 'MONDAY' not in field_names:
-            atr_empty_days = dict(zip(week_days, ['']*7))
-        else:
-            atr_empty_days = {}
         shp_dict = {}
         #To do: read from proj file
         proj = partial(pyproj.transform, pyproj.Proj(init='epsg:3857'),
            pyproj.Proj(init='epsg:4326')) #to project back into lat, lon
         for r in sf.shapeRecords():
              atr = dict(zip(field_names, r.record))
-             merge_dicts(atr, atr_empty_days)
              geom = r.shape.__geo_interface__ #Is in EPSG:4326
              geom = transform(proj, shape(geom)).__geo_interface__
              #No ID, so we use geohash9 of centroid
@@ -166,7 +160,12 @@ def shp_into_dict(filename):
                 shape(geom).centroid.coords[0][1],
                 shape(geom).centroid.coords[0][0],
                 precision = 9)
-             shp_dict[geoid] = {'features':atr, 'geometry':geom}
+             geoid_idx = geoid+'_00'
+             i = 1
+             while geoid_idx in shp_dict.keys():
+                geoid_idx = geoid + '_' +str(i).zfill(2)
+                i += 1
+             shp_dict[geoid_idx] = {'features':atr, 'geometry':geom}
     return(shp_dict)
 
 def points_to_gh7(shp_dict):
@@ -178,6 +177,11 @@ def points_to_gh7(shp_dict):
       shp_dict: dict
                 dictionary with shapefiles in geo_interface format
     """
+    #youth sites don't have opening hours fields
+    atr_empty_days = dict(zip(week_days, ['']*7))
+    for key, value in shp_dict.items():
+        if 'MONDAY' not in value['features'].keys():
+            merge_dicts(value['features'], atr_empty_days)
     siteLocationTimes = pd.DataFrame(
         index = [v['features']['site_name'] for k,v in shp_dict.items()])
     siteLocationTimes['geo_hash'] = [k[:7] for k,v in shp_dict.items()]
@@ -230,13 +234,12 @@ def findVisits(day, month, path_veraset, path_output, path_meals, k = None):
     '''
     Initialization Block
     '''
-    shp_dict_youths = shp_into_dict(path_meals + 'YouthMealSites_All')
-    shp_dict_all = shp_into_dict(path_meals + 'OtherMealSites_All')
-    
-
+    shp_dict_youths = shp_to_dict(path_meals + 'YouthMealSites_All')
+    shp_dict_all = shp_to_dict(path_meals + 'OtherMealSites_All')    
     shp_meal_sites = merge_dicts(shp_dict_all, shp_dict_youths)
 
     siteLocationTimes = points_to_gh7(shp_meal_sites)
+    pdb.set_trace()
     visitorDict = { geohash:{'name':name,'visits':0,'visitors':[]} for name, geohash in zip(siteLocationTimes.index.tolist(),siteLocationTimes.geo_hash.tolist())} 
     print('Finding visits for {} locations'.format(len(visitorDict)))
     totalVisits = 0 # initialize total number of visits per day.
