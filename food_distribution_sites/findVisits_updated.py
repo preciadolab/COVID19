@@ -48,7 +48,7 @@ def findVisits(day, month, path_veraset, path_output, path_meals, k = None):
     pdb.set_trace()
     siteLocationTimes = point_to_circle_geohash(path_meals + 'OtherMealSites_All',50,8)
     visitorDict = { geohash:{'name':name,'visits':0,'visitors':[]} for name, geohash in zip(siteLocationTimes.index.tolist(),siteLocationTimes.geo_hash.tolist())} 
-    siteVisits = {name:{'visits':0} for name in siteLocationTimes.index.tolist()}
+    siteVisits = {name:{'visits':0} for name in siteLocationTimes.index.unique().tolist()}
     print('Finding visits for {} locations'.format(len(visitorDict)))
     totalVisits = 0 # initialize total number of visits per day.
     
