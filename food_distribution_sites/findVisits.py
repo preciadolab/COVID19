@@ -238,7 +238,8 @@ def findVisits(day, month, path_veraset, path_output, path_meals, k = None):
     shp_dict_all = shp_to_dict(path_meals + 'OtherMealSites_All')    
     shp_meal_sites = merge_dicts(shp_dict_all, shp_dict_youths)
 
-    siteLocationTimes = points_to_gh7(shp_meal_sites)
+    #siteLocationTimes = points_to_gh7(shp_meal_sites)
+    siteLocationTimes = points_to_circle_geohash_8(shp_meal_sites)
     pdb.set_trace()
     visitorDict = { geohash:{'name':name,'visits':0,'visitors':[]} for name, geohash in zip(siteLocationTimes.index.tolist(),siteLocationTimes.geo_hash.tolist())} 
     print('Finding visits for {} locations'.format(len(visitorDict)))
