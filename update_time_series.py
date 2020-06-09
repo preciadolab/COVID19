@@ -100,10 +100,11 @@ def main():
 
         print(sync_caseloads(county = county))
 
-    print("Synching time series to bucket")
-    cmd='aws s3 sync ../stats/time_series/ s3://edu-upenn-wattslab-covid'
-    result = subprocess.run(cmd, shell=True, universal_newlines=True)
-    result.check_returncode()   
-    print('-- Finished synching time series to bucket')
+        print('Synching time series for {} to bucket'.format(county))
+        cmd='aws s3 sync ../stats/time_series/ s3://edu-upenn-wattslab-covid'
+        result = subprocess.run(cmd, shell=True, universal_newlines=True)
+        result.check_returncode()   
+        print('-- Finished synching time series for {} to bucket'.format(county))
+    print('--Updated all time series \n SUCCESS!')
 if __name__ == '__main__':
     main()

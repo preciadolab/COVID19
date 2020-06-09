@@ -34,11 +34,14 @@ def make_boxplot(pd_series, title, file_name = 'box.png'):
 def make_histograms(pd_series, title, labels, file_name, **kwargs):
     # Receives a list of two pandas series and produces two overlaid histograms
     bins = None
+    range_ = None
     if 'bins' in kwargs.keys():
         bins = kwargs['bins']
+    if 'range' in kwargs.keys():
+        range_ = kwargs['range']
 
-    plt.hist(pd_series[0], alpha=0.5, label=labels[0], bins = bins)
-    plt.hist(pd_series[1], alpha=0.5, label=labels[1], bins = bins)
+    plt.hist(pd_series[0], alpha=0.5, label=labels[0], bins = bins, range = range_)
+    plt.hist(pd_series[1], alpha=0.5, label=labels[1], bins = bins, range = range_)
     plt.legend(loc='upper right')
     plt.title(title, fontsize=18)
 

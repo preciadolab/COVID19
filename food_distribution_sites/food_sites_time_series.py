@@ -7,6 +7,7 @@ import pdb
 import numpy as np
 from datetime import datetime, timedelta
 
+
 def expand_row_visits(id_,dict_visits, date, norm_factor):
     dict_visits.pop('visitors')
     dict_visits['visits'] = round(dict_visits['visits']*norm_factor)
