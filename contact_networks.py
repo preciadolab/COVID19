@@ -19,10 +19,12 @@ sys.path.insert(0, 'auxiliary_functions/')
 import json_code as jjj
 import dirichlet_mle as dirichlet
 
-def row_exploder(row, prior_dict, GEOID_type = 'CBG'):
+def row_exploder(row, prior_dict, norm_factor, GEOID_type = 'CBG'):
     #return an nx3 array 
     dict_visitors = json.loads(row['visitor_home_cbgs'])
-
+    #weight by norm_factor
+    dict_visitors = {k:(v*norm_factor[k] if k in norm_factor.index else v) 
+                     for k,v in dict_visitors.items()}
     if GEOID_type == 'CT': #aggregate to census tracts
         dict_visitors_ct = {}
         for cbg, count in dict_visitors.items():
@@ -34,8 +36,7 @@ def row_exploder(row, prior_dict, GEOID_type = 'CBG'):
 
     m = len(dict_visitors)
     place_id = np.array([row.name] * m).reshape((m,1))
-
-    #count number of contacts scaling by norm_factor
+    #parsing of visits
     visits_by_hour = np.array( json.loads(row['visits_by_each_hour']) )
     if isinstance(row['top_category'],str):
         prior = prior_dict[row['top_category']]
@@ -47,7 +48,7 @@ def row_exploder(row, prior_dict, GEOID_type = 'CBG'):
     #how many of the visits correspond to the observable visits?
     #suppose that it is the same proportion as observable visitors to total visitors
     V = np.sum(visits_by_hour) *(np.sum([int(v) for k,v in  dict_visitors.items()])/row['raw_visitor_counts'])
-      #expected contacts depends on proportion of visits from a given CBG
+    #expected contacts depends on proportion of visits from a given CBG
     observed_visitors = np.sum([value for key, value in dict_visitors.items()])
     stack = [[key, V*int(value)/observed_visitors] for 
               key, value in dict_visitors.items()]
@@ -56,7 +57,6 @@ def row_exploder(row, prior_dict, GEOID_type = 'CBG'):
     df = pd.DataFrame(
         stack,
         columns = ['origin_census_block_group', 'estimated_visits'])
-
     df.insert(
         loc=0,
         column='safegraph_place_id',
@@ -64,8 +64,8 @@ def row_exploder(row, prior_dict, GEOID_type = 'CBG'):
     ev = df['estimated_visits']
     df.insert(
         loc=3,
-        column='expected_contacts',
-        value=ev*(V - ev/2 - 1/2)*posterior_norm/7)
+        column='expected_contacts', #Weekly, divide by 7 for daily
+        value=ev*(V - ev/2 - 1/2)*posterior_norm)
     df.insert(
         loc=4,
         column='posterior_norm',
@@ -73,11 +73,10 @@ def row_exploder(row, prior_dict, GEOID_type = 'CBG'):
     #distribute unobserved visits of cbgs with 1 visit among observed cbgs
     return(df)
 
-def place_cbg_contacts_table(pd_patterns, prior_dict, GEOID_type = 'CBG'):
+def place_cbg_contacts_table(pd_patterns, prior_dict, norm_factor, GEOID_type = 'CBG'):
     #vstack hstack of iterrows
-    stack = [row_exploder(row, prior_dict, GEOID_type = 'CBG')
+    stack = [row_exploder(row, prior_dict, norm_factor, GEOID_type = 'CBG')
              for i, row in pd_patterns.iterrows() if len(row['visitor_home_cbgs']) > 2]
-    pdb.set_trace()
     df = pd.concat(stack, ignore_index=True)
     #set origin_census_block_group as index
     df.set_index('safegraph_place_id', drop= True, inplace = True)
@@ -85,7 +84,8 @@ def place_cbg_contacts_table(pd_patterns, prior_dict, GEOID_type = 'CBG'):
 
 def edge_creator(row, contact_weights, self_index):
     contact_weights[self_index] = (contact_weights[self_index] -1)/2
-    edges_df = pd.DataFrame(row['posterior_norm']*row['estimated_visits']*contact_weights).reset_index()
+    edges_df = pd.DataFrame(
+        row['posterior_norm']*row['estimated_visits']*contact_weights).reset_index()
     edges_df.columns = ['destination_cbg', 'expected_contacts']
     edges_df['origin_cbg'] = row.name
     return(edges_df)
@@ -101,12 +101,16 @@ def inplace_contact_net(df):
 def obtain_prior(county_patterns, norm_factor):
     print("hello world")
 
-def contact_networks(county, core_path, patterns_path):
+def contact_networks(county, core_path, patterns_path, norm_path = '../social_distancing/normalization/'):
     #Load data about places (to get area) and patterns
-    county = '42101'
     county_places = pd.read_csv(
         core_path+'places-'+ county +'.csv',
         index_col='safegraph_place_id')
+    #Load norm factor
+    norm_factors = pd.read_csv(
+        norm_path+'normalization_{}.csv'.format(county),
+        dtype={'origin_census_block_group':str})
+    norm_factors.set_index('origin_census_block_group', drop =True, inplace=True)
 
     pattern_dates = [x[5:10] for x in 
                      sorted(os.listdir(patterns_path+'main-file-'+ county +'/'))]
@@ -118,6 +122,8 @@ def contact_networks(county, core_path, patterns_path):
         county_patterns = pd.read_csv(
             patterns_path+'main-file-'+ county +'/2020-{}-weekly-patterns.csv.gz'.format(patterns_date),
             index_col='safegraph_place_id')
+        #define norm factor
+        norm_factor = norm_factors.loc[norm_factors.date == patterns_date].norm_factor
         #COMPUTE PRIORS
         #join sub_category column to patterns, expand restaurants top category
         county_patterns= county_patterns.join(
@@ -135,14 +141,15 @@ def contact_networks(county, core_path, patterns_path):
 
         place_cbgs = place_cbg_contacts_table(
             county_patterns,
-            prior_dict)
+            prior_dict,
+            norm_factor)
         place_cbgs = place_cbgs.loc[place_cbgs['expected_contacts']>0]
 
         place_cbgs[['origin_census_block_group', 'estimated_visits', 'expected_contacts']].to_csv('../stats/time_series/networks/bipartite_network_{}.csv'.format(patterns_date),
                             index = True)
         #Now we construct non-bipartite network for the same week.
         #For each place we construct an edge list, then we aggregate with a double key
-        temp_df= [ inplace_contact_net(place_cbgs.loc[[place_id]]) for place_id in set(place_cbgs.index)]
+        temp_df= [inplace_contact_net(place_cbgs.loc[[place_id]]) for place_id in set(place_cbgs.index)]
         temp_df = [j for i in temp_df for j in i]
         print('Finished constructing distributed lists of edges')
         large_df = pd.concat(temp_df, ignore_index=True)

@@ -84,10 +84,11 @@ def main():
                               backfill=False))
         #subset social distancing metrics for county
         print("subsetting social distancing metrics for county {}".format(county))
-        print(subset_social_dist(soc_dist_path = '../social_distancing/',
+        print(subset_social_dist(soc_dist_path = '../social_distancing/soc_dist_path_global/',
                                  patterns_path = '../weekly_patterns/',
                                  county = county,
-                                 backfill = False))
+                                 backfill = False,
+                                 acs_path = '../acs_vars/'))
 
         #complete time series for county
         compliance_time_series(county = county,

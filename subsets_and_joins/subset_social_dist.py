@@ -16,27 +16,39 @@ import math
 sys.path.insert(0, '../auxiliary_functions/')
 import json_code as jjj
 
-def subset_social_dist(soc_dist_path, patterns_path, county, backfill = False):
+def subset_social_dist(soc_dist_path, patterns_path, county, acs_path, backfill = False):
       
     #List files in folder corresponding to month
-    soc_dist_path_global = soc_dist_path + 'social_dist_global/'
-    month_list = sorted(os.listdir(soc_dist_path_global))
+    month_list = sorted(os.listdir(soc_dist_path))
+
+    #Load population of CBGs 
+    df_pops = pd.read_csv(
+        acs_path + 'aggregated_acs_cbg_subset.csv',
+        dtype={'GEOID':str})
+    df_pops.set_index('GEOID', inplace=True, drop=True)
+    mask = [idx[:5] == county for idx in df_pops.index]
+    df_pops = df_pops.loc[mask, ['B01003_001_Population']]
+    df_pops = df_pops.loc[df_pops.B01003_001_Population > 0]
+    cbg_pops = df_pops.B01003_001_Population
+    cbg_pops.rename_axis('origin_census_block_group', inplace=True)
 
     date = []
-    norm_factor = []
+    norm_factors = pd.DataFrame()
     #Loop through every month
     for month in month_list:
-        day_list = sorted(os.listdir(soc_dist_path_global + month))
+        day_list = sorted(os.listdir(soc_dist_path + month))
         for day in day_list:
-            file_name = os.listdir(soc_dist_path_global + month+'/'+day)[0]
-            soc_dist_path_county = soc_dist_path + 'social_dist_{}/'.format(county)
+            file_name = os.listdir(soc_dist_path + month+'/'+day)[0]
+            soc_dist_path_county = soc_dist_path + '../social_dist_{}/'.format(county)
             os.makedirs(soc_dist_path_county + '/' + month+'/'+day, exist_ok = True)
             #check if that day has already been subset
             if os.path.isfile(soc_dist_path_county + '/' + month+'/'+day+'/'+file_name) and not backfill:
                 print("File {} exists already".format(file_name))
-                data = pd.read_csv(soc_dist_path_county + '/' + month+'/'+day+'/'+file_name)
+                data = pd.read_csv(
+                    soc_dist_path_county + '/' + month+'/'+day+'/'+file_name,
+                    dtype = {'origin_census_block_group':str})
             else:
-                data = pd.read_csv(soc_dist_path_global + month+'/'+day+'/'+file_name, dtype={'origin_census_block_group':str})
+                data = pd.read_csv(soc_dist_path + month+'/'+day+'/'+file_name, dtype={'origin_census_block_group':str})
                 #Subset to 5 digits and discard non Philadelphia
                 indexes = [i for i, number in enumerate(data['origin_census_block_group']) if number[:5] == county]
                 data = data.loc[indexes]
@@ -49,19 +61,33 @@ def subset_social_dist(soc_dist_path, patterns_path, county, backfill = False):
                 print('Writing file {}'.format(file_name))
                 data.to_csv(path_or_buf= soc_dist_path_county + '/' + month+'/'+day+'/'+file_name, compression='gzip', index=False)
             
-            date = date + [month + '-' + day]
-            norm_factor = norm_factor + [np.sum(data['candidate_device_count'])/np.sum(data['device_count'])]
+            ##Create norm factor, this should be affected by backfill
+            #insert cbg_pops column            
+            data.set_index('origin_census_block_group', drop=True, inplace=True)            
+            cbg_pops = cbg_pops[ [x for x in cbg_pops.index if x in data.index] ]
+            data = data.loc[ [x for x in data.index if x in cbg_pops.index] ]
+            data.insert(
+                loc= len(data.columns),
+                column='total_population',
+                value=cbg_pops)
 
-    norm_df = pd.DataFrame({'date':date, 'normalization_factor':norm_factor})
-    os.makedirs(patterns_path+'normalization_stats-{}/'.format(county), exist_ok = True)
-    norm_df.to_csv(patterns_path+'normalization_stats-{}/2020-daily.csv'.format(county), index=False)
-    #Export relevant daily and weekly normalization stats
-    #List the 168 hours with normalization factors for a given week
-    pattern_dates = [x[5:10] for x in sorted(os.listdir(patterns_path+'main-file-'+ county +'/'))]
-    for date in pattern_dates:
-        #Find index for such date
-        i = norm_df['date'].tolist().index(date)
-        hourly_list = [ np.array([norm_df['normalization_factor'][j]]*24).reshape((24,1)) for j in range(i,i+7)]
-        hourly_factors = pd.DataFrame(np.vstack(hourly_list), columns = ['normalization_factor'])
-        hourly_factors.to_csv(patterns_path + 'normalization_stats-{}/2020-{}-normalization.csv'.format(county, date))
+            date = month + '-' + day
+            norm_factor = data['total_population']/data['candidate_device_count']
+
+            norm_frame = pd.DataFrame(
+                {'date':[date]*len(data), 'norm_factor':norm_factor})
+            norm_factors = pd.concat([norm_factors, norm_frame])
+    
+    os.makedirs(soc_dist_path+'../normalization/', exist_ok = True)
+    norm_factors.to_csv(
+        soc_dist_path+'../normalization/normalization_{}.csv'.format(county),
+        index=True)
+    pdb.set_trace()
     return(0)
+
+if __name__ == '__main__':
+    print(subset_social_dist(soc_dist_path = '../../social_distancing/social_dist_42101/',
+                             patterns_path = '../../weekly_patterns/',
+                             county = '42101',
+                             backfill = False,
+                             acs_path = '../../acs_vars/'))

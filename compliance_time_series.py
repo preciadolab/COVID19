@@ -144,16 +144,16 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
                 prior_dict = {}
                 for category in county_patterns.top_category.value_counts().index:
                     places_in_cat = county_patterns['top_category'] == category
-                    dirich_samples = [np.array(json.loads(x))*norm_factor for x in county_patterns.loc[places_in_cat, 'visits_by_each_hour'] ] 
+                    dirich_samples = [np.array(json.loads(x)) for x in county_patterns.loc[places_in_cat, 'visits_by_each_hour'] ] 
                     prior_dict[category] = dirichlet.getInitAlphas(dirich_samples)
                 if GEOID_type == 'CBG':
-                    place_cbgs = ccc.place_cbg_contacts_table(county_patterns, norm_factor, prior_dict)
+                    place_cbgs = ccc.place_cbg_contacts_table(county_patterns, prior_dict)
                     place_cbgs = place_cbgs.loc[place_cbgs['expected_contacts']>1]
                     place_cbgs = place_cbgs.join(county_places[['location_name','latitude','longitude']], how='inner')
                     place_cbgs.reset_index(inplace=True, drop=False)
                     place_cbgs.set_index('origin_census_block_group', inplace=True, drop=True)
                 if GEOID_type == 'CT':
-                    place_cts = ccc.place_ct_contacts_table(county_patterns, norm_factor, prior_dict)
+                    place_cts = ccc.place_ct_contacts_table(county_patterns, prior_dict)
                     place_cts = place_cts.join(county_places[['location_name','latitude','longitude']], how='inner')
                     place_cts.reset_index(inplace=True, drop=False)
                     place_cts.set_index('origin_census_tract', inplace=True, drop=True)
