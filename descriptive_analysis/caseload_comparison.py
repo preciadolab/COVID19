@@ -26,8 +26,8 @@ def main():
     make_lines(
         x_axis=[x for x in range(len(city_trajectory))],
         y_axes=[city_trajectory, city_trajectory],
-        title= 'Simulated trajectory [REMOVED]\n beta=0.28, initial_cases=50',
-        labels = ['simulation', 'real'],
+        title='Simulated trajectory [REMOVED]\n beta=0.28, initial_cases=50',
+        labels=['simulation', 'real'],
         file_name='../plots/simulated_trajectory.png')
 
 if __name__ == '__main__':

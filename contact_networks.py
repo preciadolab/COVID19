@@ -114,7 +114,6 @@ def contact_networks(county, core_path, patterns_path, norm_path = '../social_di
 
     pattern_dates = [x[5:10] for x in 
                      sorted(os.listdir(patterns_path+'main-file-'+ county +'/'))]
-    pattern_dates = ['03-09','03-16']#DELETE!
     #Create visitor table, weighing daily visits by active users in the panel 
 
     for patterns_date in pattern_dates:
