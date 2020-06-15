@@ -82,7 +82,6 @@ def subset_social_dist(soc_dist_path, patterns_path, county, acs_path, backfill 
     norm_factors.to_csv(
         soc_dist_path+'../normalization/normalization_{}.csv'.format(county),
         index=True)
-    pdb.set_trace()
     return(0)
 
 if __name__ == '__main__':
