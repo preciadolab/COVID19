@@ -25,6 +25,10 @@ from subset_social_dist import subset_social_dist
 from compliance_time_series import *
 from sync_caseloads import sync_caseloads
 
+
+month_names = ['January', 'February', 'March', 'April',
+               'May', 'June', 'July', 'August',
+               'September', 'October', 'November', 'December']
 def main():
     #Sync weekly_patterns files from Safegraph
     print('-- Synching weekly patterns')
@@ -46,7 +50,19 @@ def main():
     #Sync core_places files from Safegraph
     print('-- Synching core places')
     core_list = os.listdir('../core_places/')
-    if any([re.search(r'2020-{}'.format(strftime("%m")), x) is not None for x in core_list]):
+    #obtain filename of latest core places release
+    cmd= 'aws s3 ls s3://sg-c19-response/core/2020/{}/ --profile safegraph_consortium '.format(
+        strftime("%m"))
+    result = subprocess.run(
+        cmd,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True)
+    result.check_returncode()
+    core_filename = [x.split(' ')[-1] for x in result.stdout.split('\n')][0]
+    pdb.set_trace()
+    if core_filename in core_list:
         print('-- Core places up to date')
     else:
         cmd= 'aws s3 sync s3://sg-c19-response/core/2020/{}/ ../core_places/ --profile safegraph_consortium '.format(strftime("%m"))
@@ -54,8 +70,7 @@ def main():
         result.check_returncode()    
         print('--Finished synching core places')
         #delete current core objects?
-        zip_file = [x for x in os.listdir('../core_places/') if re.search(r'CorePlaces', x) is not None][0]
-        cmd= 'unzip -o -j ../core_places/'+zip_file+' -d ../core_places/'
+        cmd= 'unzip -o -j ../core_places/'+core_filename+' -d ../core_places/'
         result = subprocess.run(cmd, shell=True, universal_newlines=True)
         result.check_returncode()
 
@@ -92,6 +107,7 @@ def main():
 
         #complete time series for county
         compliance_time_series(county = county,
+
                                core_path = '../core_places/',
                                patterns_path = '../weekly_patterns/',
                                backfill = False,

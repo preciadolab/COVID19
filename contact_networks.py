@@ -144,8 +144,9 @@ def contact_networks(county, core_path, patterns_path, norm_path = '../social_di
             norm_factor)
         place_cbgs = place_cbgs.loc[place_cbgs['expected_contacts']>0]
 
-        place_cbgs[['origin_census_block_group', 'estimated_visits', 'expected_contacts']].to_csv('../stats/time_series/networks/bipartite_network_{}.csv'.format(patterns_date),
-                            index = True)
+        place_cbgs[['origin_census_block_group', 'estimated_visits', 'expected_contacts']].to_csv(
+            '../stats/time_series/networks/bipartite_network_{}.csv'.format(patterns_date),
+            index = True)
         #Now we construct non-bipartite network for the same week.
         #For each place we construct an edge list, then we aggregate with a double key
         temp_df= [inplace_contact_net(place_cbgs.loc[[place_id]]) for place_id in set(place_cbgs.index)]
@@ -157,10 +158,10 @@ def contact_networks(county, core_path, patterns_path, norm_path = '../social_di
         contact_net.to_csv('../stats/time_series/networks/contact_network_{}.csv'.format(patterns_date), index=True)
         print('Finished exporting networks')
 
-    cmd='aws s3 sync ../stats/time_series/ s3://edu-upenn-wattslab-covid'
-    result = subprocess.run(cmd, shell=True, universal_newlines=True)
-    result.check_returncode()   
-    print('-- Finished synching time series to bucket')
+        cmd='aws s3 sync ../stats/time_series/ s3://edu-upenn-wattslab-covid'
+        result = subprocess.run(cmd, shell=True, universal_newlines=True)
+        result.check_returncode()   
+        print('-- Finished synching time series to bucket')
 
 if __name__ == '__main__':
     contact_networks(county = '42101',

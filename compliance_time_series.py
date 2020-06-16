@@ -22,6 +22,9 @@ import contact_networks as ccc
 import data_structuring as ddd #ratio_fun #merge_dicts #one_rower #ts_from_var #visit_parser
 import dirichlet_mle as dirichlet
 
+month_names = ['January', 'February', 'March', 'April',
+               'May', 'June', 'July', 'August',
+               'September', 'October', 'November', 'December']
 def update_metrics_columns(row, date_name, place_cbgs, county_places, columns):
 
     if row['origin_census_block_group'] in place_cbgs.index:
@@ -86,10 +89,6 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
     """
     #Load data about places and patterns
     county_places = pd.read_csv(core_path+'places-'+ county +'.csv', index_col='safegraph_place_id')   
-
-    month_names = ['January', 'February', 'March', 'April',
-                   'May', 'June', 'July', 'August',
-                   'September', 'October', 'November', 'December']
     
     pattern_dates = [x[5:10] for x in sorted(os.listdir(patterns_path+'main-file-'+ county +'/'))]
     w = 0
