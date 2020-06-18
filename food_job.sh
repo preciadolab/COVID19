@@ -2,7 +2,7 @@
 #$ -S /bin/bash      # <- use bash shell
 #$ -N food_job		 # <- name of job
 #$ -cwd              # <- run job 'here' (required!!)
-#$ -t 1-57           # <- array job first-last
+#$ -t 16-25,46-55    # <- array job first-last
 #$ -o output/output_$TASK_ID.out  # <- output file
 #$ -j y              # <- join output & error (best!)
 
