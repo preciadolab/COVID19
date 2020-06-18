@@ -135,7 +135,7 @@ def main():
     findHome(month = month,
              day = day,
              path_veraset = '../../veraset-42101/',
-             path_json =    '../../stats/findVisitsResults/',
+             path_json =    '../../stats/findVisitsResultsPR/',
              path_output =  '../../stats/findHomeResultsPR/')
 
 if __name__ == '__main__':

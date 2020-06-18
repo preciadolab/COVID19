@@ -52,7 +52,7 @@ def findVisits(day, month, path_veraset, path_output, path_meals):
         visitorDict, siteVisits, totalVisits = checkVisits(userLocationTimes,siteLocationTimes,visitorDict,siteVisits,totalVisits,8)
 
     os.makedirs(path_output, exist_ok=True)
-    with open(path_output + 'pr_food_visits_{}-{}.json'.format(month,day), 'w+') as fp:
+    with open(path_output + 'food_visits_{}-{}.json'.format(month,day), 'w+') as fp:
         json.dump(visitorDict, fp)
     print('--Finished finding visits for {}-{}, found {} visits'.format(month, day, totalVisits))
 
@@ -84,7 +84,7 @@ def main():
                month=month,
                path_veraset='../../veraset-42101/',
                path_meals='../../food_sites/',
-               path_output='../../stats/findVisitsResults/',
+               path_output='../../stats/findVisitsResultsPR/',
                k = k) 
 
  if __name__ == '__main__':
