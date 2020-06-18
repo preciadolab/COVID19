@@ -87,9 +87,9 @@ def main():
     print("Starting subset on {} chunks".format(len(file_list)))
     for file_name in file_list:
         if int(month) > 5 or (int(month) >= 5 and int(day) >= 4): 
-            cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' + file_name + ' ./ --profile veraset' 
+            cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/' + file_name + ' ./' 
         else:
-            cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/backfill/2020/'+ month +'/'+day+'/' + file_name + ' ./ --profile veraset' 
+            cmd='aws s3 cp s3://safegraph-outgoing/verasetcovidmovementusa/backfill/2020/'+ month +'/'+day+'/' + file_name + ' ./' 
 
         result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         result.check_returncode()
