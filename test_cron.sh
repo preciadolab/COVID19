@@ -1,3 +1,3 @@
 #!/bin/bash
-
-/usr/bin/python /fsx/paco/multiscale_epidemic/test.py
+cd /fsx/paco/multiscale_epidemic/
+/usr/bin/python test.py

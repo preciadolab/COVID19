@@ -152,7 +152,10 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
                     place_cbgs.reset_index(inplace=True, drop=False)
                     place_cbgs.set_index('origin_census_block_group', inplace=True, drop=True)
                 if GEOID_type == 'CT':
-                    place_cts = ccc.place_ct_contacts_table(county_patterns, prior_dict)
+                    place_cts = ccc.place_cbg_contacts_table(
+                        county_patterns,
+                        prior_dict,
+                        GEOID_type = 'CT')
                     place_cts = place_cts.join(county_places[['location_name','latitude','longitude']], how='inner')
                     place_cts.reset_index(inplace=True, drop=False)
                     place_cts.set_index('origin_census_tract', inplace=True, drop=True)
