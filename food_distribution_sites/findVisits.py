@@ -64,20 +64,12 @@ def findVisits(day, month, path_veraset, path_output, path_meals, k = None):
         json.dump(visitorDict, fp)
     print('--Finished finding visits for {}-{}, found {} visits'.format(month, day, totalVisits))
 
-# if __name__ == '__main__':
-#     daylist= list(range(18,26))+list(range(48, 56))
-#     for k in daylist:
-#         findVisits(day='04',
-#                    month='05',
-#                    path_veraset='../../veraset-42101/',
-#                    path_meals='../../meal_sites/',
-#                    path_output='../../stats/findVisitsResults/',
-#                    k = k) 
-
-if __name__ == '__main__':
-    findVisits(day='04',
-               month='05',
-               path_veraset='../../veraset-42101/',
-               path_meals='../../food_sites/',
-               path_output='../../stats/findVisitsResults/',
-               k = None) 
+ if __name__ == '__main__':
+     daylist= list(range(18,26))+list(range(48, 56))
+     for k in daylist:
+         findVisits(day='04',
+                    month='05',
+                    path_veraset='../../veraset-42101/',
+                    path_meals='../../meal_sites/',
+                    path_output='../../stats/findVisitsResults/',
+                    k = k) 
