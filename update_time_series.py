@@ -110,7 +110,7 @@ def main():
         compliance_time_series(county = county,
                                core_path = '../core_places/',
                                patterns_path = '../weekly_patterns/',
-                               backfill = False,
+                               backfill = True,
                                GEOID_type = 'CT')
 
         print(split_time_series(county = county, GEOID_type = 'CT'))
