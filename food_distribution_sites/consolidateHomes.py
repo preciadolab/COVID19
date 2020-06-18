@@ -65,8 +65,8 @@ def main(path_json, path_output):
 
     df['home_cbg'] = [home_to_cbg(home_geohash, cb_polygon_dict) for home_geohash in df['home_geohash']]
 
-    df.to_csv(path_output + 'user_homes_upd.csv', index = False)
+    df.to_csv(path_output + 'user_homes_pr.csv', index = False)
 
 if __name__ == '__main__':
-    main(path_json = '../../stats/findHomeResults/',
+    main(path_json = '../../stats/findHomeResultsPR/',
          path_output = '../../stats/')
