@@ -53,9 +53,9 @@ def main():
             print("Subsetting for {}-{} (mm-dd)".format(month, day))
 
     if int(month) > 5 or (int(month) >= 5 and int(day) >= 4): 
-        cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/ --profile veraset'
+        cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/2020/'+ month +'/'+day+'/'
     else:
-        cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/backfill/2020/'+ month +'/'+day+'/ --profile veraset'
+        cmd='aws s3 ls s3://safegraph-outgoing/verasetcovidmovementusa/backfill/2020/'+ month +'/'+day+'/'
 
     result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     result.check_returncode()
