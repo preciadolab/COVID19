@@ -73,7 +73,7 @@ def main():
         geojson = json.load(fp)
     cb_polygon_dict = {}
     for i in range(len(geojson['features'])):
-        if geojson['features'][i]['properties']['GEOID'][:5] in ['42101','42045','42091']:
+        if geojson['features'][i]['properties']['GEOID'][:5] in ['42101','42045','42091', '34007']:
             cb_polygon_dict[geojson['features'][i]['properties']['GEOID']] =  geojson['features'][i]['geometry']
 
     cb_polygon_dict = { k:shape(v) for k,v in cb_polygon_dict.items()}
