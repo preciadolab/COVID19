@@ -61,7 +61,6 @@ def main():
         universal_newlines=True)
     result.check_returncode()
     core_filename = [x.split(' ')[-1] for x in result.stdout.split('\n')][0]
-    pdb.set_trace()
     if core_filename in core_list:
         print('-- Core places up to date')
     else:
