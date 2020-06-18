@@ -136,7 +136,7 @@ def main():
              day = day,
              path_veraset = '../../veraset-42101/',
              path_json =    '../../stats/findVisitsResults/',
-             path_output =  '../../stats/findHomeResults/')
+             path_output =  '../../stats/findHomeResultsPR/')
 
 if __name__ == '__main__':
     main()
