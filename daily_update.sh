@@ -1,3 +1,3 @@
 #!/bin/bash
-
-/fsx/paco/multiscale_epidemic/venv_covid/bin/python /fsx/paco/multiscale_epidemic/update_time_series.py
+cd /fsx/paco/multiscale_epidemic/
+/fsx/paco/multiscale_epidemic/venv_covid/bin/python update_time_series.py
