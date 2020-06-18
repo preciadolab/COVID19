@@ -143,14 +143,18 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
                 restaurants = county_patterns['top_category'] == 'Restaurants and Other Eating Places'
                 county_patterns.loc[restaurants, 'top_category'] = county_patterns.loc[restaurants, 'sub_category']
                 norm_factor = norm_factors.loc[norm_factors.date == patterns_date].norm_factor
-                
+
                 prior_dict = {}
                 for category in county_patterns.top_category.value_counts().index:
                     places_in_cat = county_patterns['top_category'] == category
                     dirich_samples = [np.array(json.loads(x)) for x in county_patterns.loc[places_in_cat, 'visits_by_each_hour'] ] 
                     prior_dict[category] = dirichlet.getInitAlphas(dirich_samples)
                 if GEOID_type == 'CBG':
-                    place_cbgs = ccc.place_cbg_contacts_table(county_patterns, prior_dict)
+                    place_cbgs = ccc.place_cbg_contacts_table(
+                        county_patterns,
+                        prior_dict,
+                        norm_factor,
+                        GEOID_type)
                     place_cbgs = place_cbgs.loc[place_cbgs['expected_contacts']>1]
                     place_cbgs = place_cbgs.join(county_places[['location_name','latitude','longitude']], how='inner')
                     place_cbgs.reset_index(inplace=True, drop=False)
@@ -159,8 +163,8 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
                     place_cts = ccc.place_cbg_contacts_table(
                         county_patterns,
                         prior_dict,
-                        norm_factor=,
-                        GEOID_type = 'CT')
+                        norm_factor,
+                        GEOID_type)
                     place_cts = place_cts.join(county_places[['location_name','latitude','longitude']], how='inner')
                     place_cts.reset_index(inplace=True, drop=False)
                     place_cts.set_index('origin_census_tract', inplace=True, drop=True)
