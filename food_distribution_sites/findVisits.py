@@ -20,20 +20,12 @@ import numpy as np
 import pdb
 import os
 from findVisitFunctions import convertToEasternTime, checkVisits, point_to_circle_geohash, shp_into_dict
+import getopt, sys
 
-def findVisits(day, month, path_veraset, path_output, path_meals, k = None):
+def findVisits(day, month, path_veraset, path_output, path_meals):
     """
     Read in the csv files and stores the geohash and time of the visit, sequentially
     """
-    #Optional specification of month and day to use in parallel
-    if k is not None:
-        if k in list(range(1,31)):
-            month = '04'
-            day = str(k).zfill(2)
-        elif k in list(range(31,62)):
-            month = '05'
-            day = str(k - 30).zfill(2)
-    print("Finding visits for {}-{} (mm-dd)".format(month, day))
     ############################################################
 
     all_files = os.listdir(path_veraset + month+'/'+day+'/')
@@ -60,16 +52,41 @@ def findVisits(day, month, path_veraset, path_output, path_meals, k = None):
         visitorDict, siteVisits, totalVisits = checkVisits(userLocationTimes,siteLocationTimes,visitorDict,siteVisits,totalVisits,8)
 
     os.makedirs(path_output, exist_ok=True)
-    with open(path_output + 'food_visits_{}-{}.json'.format(month,day), 'w+') as fp:
+    with open(path_output + 'pr_food_visits_{}-{}.json'.format(month,day), 'w+') as fp:
         json.dump(visitorDict, fp)
     print('--Finished finding visits for {}-{}, found {} visits'.format(month, day, totalVisits))
 
+def main():
+    argument_list = sys.argv[1:]
+    short_options = "k:"
+    long_options = ["index"]
+
+    try:
+        arguments, values = getopt.getopt(argument_list, short_options, long_options)
+    except getopt.error as err:
+        # Output error, and return with an error code
+        print (str(err))
+        sys.exit(2)
+
+    k = 1
+    for current_argument, current_value in arguments:
+        if current_argument in ("-k", "--index"):
+            #find k-th day since April 1 
+            if int(current_value) in list(range(1,31)):
+                month = '04'
+                day = str(int(current_value)).zfill(2)
+            elif int(current_value) in list(range(31,62)):
+                month = '05'
+                day = str(int(current_value) - 30).zfill(2)
+            print("Subsetting for {}-{} (mm-dd)".format(month, day))
+
+    findVisits(day=day,
+               month=month,
+               path_veraset='../../veraset-42101/',
+               path_meals='../../food_sites/',
+               path_output='../../stats/findVisitsResults/',
+               k = k) 
+
  if __name__ == '__main__':
-     daylist= list(range(18,26))+list(range(48, 56))
-     for k in daylist:
-         findVisits(day='04',
-                    month='05',
-                    path_veraset='../../veraset-42101/',
-                    path_meals='../../meal_sites/',
-                    path_output='../../stats/findVisitsResults/',
-                    k = k) 
+    main()
+

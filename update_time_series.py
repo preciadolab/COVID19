@@ -63,7 +63,9 @@ def main():
     core_filename = [x.split(' ')[-1] for x in result.stdout.split('\n')][0]
     if core_filename in core_list:
         print('-- Core places up to date')
+        new_core_file = False
     else:
+        new_core_file = True
         cmd= 'aws s3 sync s3://sg-c19-response/core/2020/{}/ ../core_places/ --profile safegraph_consortium '.format(strftime("%m"))
         result = subprocess.run(cmd, shell=True, universal_newlines=True)
         result.check_returncode()    
@@ -95,7 +97,7 @@ def main():
         print(subset_patterns(core_path = '../core_places/',
                               pattern_path = '../weekly_patterns/',
                               county= county,
-                              backfill=False))
+                              backfill=True if new_core_file else False))
         #subset social distancing metrics for county
         print("subsetting social distancing metrics for county {}".format(county))
         print(subset_social_dist(soc_dist_path = '../social_distancing/social_dist_global/',
