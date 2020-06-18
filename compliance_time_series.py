@@ -130,7 +130,7 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
                 if date_name in existing_dates:
                     continue
                 print("--changing to next patterns file")
-                county_patterns = pd.read_csv(patterns_path + 'main-file-{}/2020-{}-weekly-patterns.csv.gz'.format(county, next_date),
+                county_patterns = pd.read_csv(patterns_path + 'main-file-{}/2020-{}-weekly-patterns.csv.gz'.format(county, date_name),
                     index_col='safegraph_place_id')
                 norm_factors = pd.read_csv(
                     '../social_distancing/normalization/'+'normalization_{}.csv'.format(county),
@@ -142,7 +142,7 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
                 county_patterns= county_patterns.join(county_places[['top_category','sub_category']], how='inner')
                 restaurants = county_patterns['top_category'] == 'Restaurants and Other Eating Places'
                 county_patterns.loc[restaurants, 'top_category'] = county_patterns.loc[restaurants, 'sub_category']
-                norm_factor = norm_factors.loc[norm_factors.date == patterns_date].norm_factor
+                norm_factor = norm_factors.loc[norm_factors.date == date_name].norm_factor
 
                 prior_dict = {}
                 for category in county_patterns.top_category.value_counts().index:
