@@ -90,7 +90,7 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
     #Load data about places and patterns
     county_places = pd.read_csv(core_path+'places-'+ county +'.csv', index_col='safegraph_place_id')   
     
-    pattern_dates = [x[5:10] for x in sorted(os.listdir(patterns_path+'main-file-'+ county +'/'))]
+    pattern_dates = [x[5:9] for x in sorted(os.listdir(patterns_path+'main-file-'+ county +'/'))]
     w = 0
     next_date = pattern_dates[w]
     #Create visitor table
@@ -121,7 +121,7 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
         #Loop through every day
         day_list = sorted(os.listdir(months_path + month))
         for day in day_list: 
-            date_name = month_names[int(month)-1] + '_' + day
+            date_name = month + '-' + day
             print(date_name)
             if month+'-'+day == next_date:
                 w = w+1
