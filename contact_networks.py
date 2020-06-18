@@ -75,7 +75,7 @@ def row_exploder(row, prior_dict, norm_factor, GEOID_type = 'CBG'):
 
 def place_cbg_contacts_table(pd_patterns, prior_dict, norm_factor, GEOID_type = 'CBG'):
     #vstack hstack of iterrows
-    stack = [row_exploder(row, prior_dict, norm_factor, GEOID_type = 'CBG')
+    stack = [row_exploder(row, prior_dict, norm_factor, GEOID_type = GEOID_type)
              for i, row in pd_patterns.iterrows() if len(row['visitor_home_cbgs']) > 2]
     df = pd.concat(stack, ignore_index=True)
     #set origin_census_block_group as index

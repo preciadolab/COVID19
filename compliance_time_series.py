@@ -132,14 +132,18 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
                 print("--changing to next patterns file")
                 county_patterns = pd.read_csv(patterns_path + 'main-file-{}/2020-{}-weekly-patterns.csv.gz'.format(county, next_date),
                     index_col='safegraph_place_id')
-                normalization = pd.read_csv(patterns_path + 'normalization_stats-{}/2020-{}-normalization.csv'.format(county, next_date))
-                norm_factor = normalization['normalization_factor'].values
+                norm_factors = pd.read_csv(
+                    '../social_distancing/normalization/'+'normalization_{}.csv'.format(county),
+                    dtype={'origin_census_block_group':str})
+                norm_factors.set_index('origin_census_block_group', drop =True, inplace=True)
+
 
                 #Establish prior for hourly distribution of visits at the top_category level
                 county_patterns= county_patterns.join(county_places[['top_category','sub_category']], how='inner')
                 restaurants = county_patterns['top_category'] == 'Restaurants and Other Eating Places'
                 county_patterns.loc[restaurants, 'top_category'] = county_patterns.loc[restaurants, 'sub_category']
-
+                norm_factor = norm_factors.loc[norm_factors.date == patterns_date].norm_factor
+                
                 prior_dict = {}
                 for category in county_patterns.top_category.value_counts().index:
                     places_in_cat = county_patterns['top_category'] == category
@@ -155,6 +159,7 @@ def compliance_time_series(county, core_path , patterns_path, backfill = False, 
                     place_cts = ccc.place_cbg_contacts_table(
                         county_patterns,
                         prior_dict,
+                        norm_factor=,
                         GEOID_type = 'CT')
                     place_cts = place_cts.join(county_places[['location_name','latitude','longitude']], how='inner')
                     place_cts.reset_index(inplace=True, drop=False)
