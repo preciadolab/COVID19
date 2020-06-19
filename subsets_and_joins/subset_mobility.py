@@ -116,9 +116,10 @@ def main():
         deleted = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         deleted.check_returncode()
         print('subsetted file {} succesfully'.format(newfile_name))
-
-    e_time = np.round(time.time() - s_time, 0)
-    print(e_time)
+        
+# This stopped the program so I am just going to comment it out
+#    e_time = np.round(time.time() - s_time, 0)
+#    print(e_time)
 
 if __name__ == '__main__':
     main()
